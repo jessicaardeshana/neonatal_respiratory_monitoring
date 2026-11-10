@@ -10,7 +10,14 @@
 
 **Rules:** never push to `main` until Alan says so; push only to feature branches. Newest entry on top.
 
-**Current state:** Phase 6 complete (awaiting review). Next: Phase 7, bring-up docs (`scripts/bringup_lepton.md`, finish `thermal/README.md`).
+**Current state:** Phases 0-6 and 4b complete and pushed. **New plan approved in principle: interactive demo + device app (`DEMO_APP_SPEC.md`), built BEFORE Phase 7.** Next: Alan reviews `DEMO_APP_SPEC.md`, then build step A. Phase 7 (bring-up docs) follows the app.
+
+### 2026-11-10 · branch `thermalexploration` · Plan: interactive demo + device app (no code yet)
+- **Why:** Alan wants to screen-record a polished interactive demo for the team (thermal video playback, step-by-step pipeline, sliders, results and honest limits) that doubles as the product's software side, including a Device screen that detects a Lepton and shows the live feed.
+- **Decisions (Alan, 2026-11-10):** local web app (Python/FastAPI backend running the real pipeline + browser UI); features = 30 s frame playback, step-by-step pipeline view, lab sliders, results and limits page; Device screen with safe detection (USB identity, never opens a camera until Connect); dark clinical look; guided tour + free explore; opening story = normal -> speed-up -> 25 s pause + alarm -> recovery with an FFC glitch handled; unbranded title. Full plan, architecture, honesty rules, build steps A-G and acceptance criteria are in `DEMO_APP_SPEC.md`.
+- **Order change:** Phase 7 (bring-up docs) now comes after the app, because the Device screen and live path shape the hardware-day checklist.
+- **Open risks:** USB IDs for the Lepton breakout and the whole live path are unverified; slider recompute speed; windowed (not causal) live processing.
+- **Next step:** Alan approves or edits `DEMO_APP_SPEC.md`; then build step A (backend + API) and stop at Checkpoint 1 (Monitor screen playing the default story).
 
 ### 2026-11-10 · branch `thermalexploration` · Phase 6 end-to-end demo
 - **Done:** `scripts/run_synthetic_demo.py`: ONE command (`python scripts/run_synthetic_demo.py` from `thermal/`, about 10 s; `--quick` skips the acceptance sweeps) runs the full pipeline through `run_pipeline` on a `SyntheticSource` and writes `figures/demo_summary.png` (raw signal, filtered signal, estimated vs true rate, apnea flags vs truth, control ROI), `figures/demo_report.md` (numbers + Section 9 checklist) and `data/demo_processed.npz` (the Section 7 output contract; see the new note under the Section 7 table). New helpers: `pipeline.processed_arrays / save_processed / load_processed`, `rate.hold_to_grid`, public `recorder.git_commit`. `thermal/README.md` now says how to run it. 99 tests pass.
