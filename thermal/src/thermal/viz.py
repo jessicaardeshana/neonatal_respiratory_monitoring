@@ -77,3 +77,36 @@ def phase1_overview(res: SyntheticResult, path: str, frame_index: int = 100) -> 
     fig.tight_layout()
     fig.savefig(path, dpi=110)
     plt.close(fig)
+
+
+def phase2_before_after(res: SyntheticResult, none_res: SyntheticResult, off, on, none_off,
+                        none_on, path: str) -> None:
+    """Phase 2 figure: raw vs cleaned signal, and the no-breathing FFC test."""
+    tr = res.truth
+    step_t = res.timestamps[tr.ffc_step_indices]
+    fig, ax = plt.subplots(3, 1, figsize=(13, 10), sharex=True)
+    fig.suptitle("Phase 2: SYNTHETIC data, FFC + drift handling before vs after "
+                 "(drift exaggerated to 0.5 degC/min for visibility)", fontsize=13)
+
+    ax[0].plot(off.t, off.s_raw)
+    ax[0].set_title("BEFORE: raw nostril signal (drifting upward, with FFC level steps)")
+    ax[0].set_ylabel("degC")
+    ax[1].plot(on.t, on.s_filt)
+    ax[1].set_title("AFTER: FFC repaired, reference-cancelled, detrended, band-passed "
+                    "(breathing at 15 breaths/min, steady amplitude)")
+    ax[1].set_ylabel("degC")
+    for a in ax[:2]:
+        for k, ts in enumerate(step_t):
+            a.axvline(ts, color="red", ls="--", alpha=0.6, label="FFC step" if k == 0 else None)
+        a.legend(loc="upper right", fontsize=8)
+
+    ax[2].plot(none_off.t, none_off.s_filt, label="FFC handling OFF: spurious 'breaths'", alpha=0.9)
+    ax[2].plot(none_on.t, none_on.s_filt, label="FFC handling ON: flat (correct)", lw=1.5)
+    ax[2].set_title("ACCEPTANCE TEST: recording with NO breathing at all but FFC events, "
+                    "band-passed signal")
+    ax[2].set_ylabel("degC"); ax[2].set_xlabel("time (s)"); ax[2].legend(loc="upper right", fontsize=8)
+    for ts in none_res.timestamps[none_res.truth.ffc_step_indices]:
+        ax[2].axvline(ts, color="red", ls="--", alpha=0.4)
+    fig.tight_layout()
+    fig.savefig(path, dpi=110)
+    plt.close(fig)

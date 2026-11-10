@@ -35,4 +35,12 @@ class PipelineConfig:
     profile: Profile = ADULT
     fs_nominal: float = FS_NOMINAL_HZ
     filter_order: int = 4  # Butterworth order
+    reduction: str = "mean"  # ROI reduction: "mean" or "max"
+    ffc_handling: bool = True  # detect + repair FFC glitches
+    reference_subtract: bool = True  # cancel drift/FFC steps with background ROI
+    detrend: str = "highpass"  # "highpass", "movmean" or "poly"
+    frozen_tol_c: float = 1e-4  # degC: frame is a repeat if max pixel change < this
+    step_min_c: float = 0.05  # degC: smallest whole-scene jump treated as an FFC step
+    step_k: float = 8.0  # step threshold = max(step_min_c, step_k * noise sigma)
+    max_gap_s: float = 2.0  # longest invalid gap (s) repaired by interpolation
     extra: dict = field(default_factory=dict)
