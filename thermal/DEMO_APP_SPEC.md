@@ -1,8 +1,40 @@
 # DEMO_APP_SPEC.md: Thermal Respiratory Sensing, Interactive Demo + Device App
 
 > Plan for the interactive app. Companion to `THERMAL_SPEC.md` (the science, pipeline and session log).
-> Status: PLAN, approved decisions below, nothing built yet. Owner: Alan. Keep all code inside `thermal/`.
+> Status (2026-11-10, 18:36): **steps A-D built and pushed; E, F, G still to build.** See "Build status" and "Deviations from the plan" right below. Owner: Alan. Keep all code inside `thermal/`.
 > Read `THERMAL_SPEC.md` first (especially Sections 6-7, 11 and the session log) so you know what the pipeline does.
+
+---
+
+## Build status (as of 2026-11-10, branch `thermalexploration`)
+
+| step | what | status | commit |
+|---|---|---|---|
+| A | Backend: scenarios, service, API, `run_app.py`, `app` extras, API tests | DONE | 50b3975 |
+| B | UI shell + Monitor + thermal player (Checkpoint 1) | DONE, redesigned after Alan's feedback | 50b3975, 6330053 |
+| C | Pipeline view: 7 stages, before/after, plain-language text | DONE | d1b392e |
+| D | Lab: sliders, presets, live rerun (Checkpoint 2) | DONE | f469f9d |
+| E | Results & limits page + guided tour | NOT STARTED (data endpoint `GET /api/results` exists; the tab and the header "Guided tour" button are placeholders) | |
+| F | Device screen: safe detection, Connect, live view, ROI picker, Record | NOT STARTED (`devices.py`, `live.py` do not exist yet) | |
+| G | Polish: 1920x1080 check, Full-scene colors, README | NOT STARTED | |
+
+Run it: `pip install -e ".[dev,app]"` then `python scripts/run_app.py` (port 8765). Tests: `tests/test_app_api.py` (about 65 of the 146 tests).
+
+## Deviations from the plan (what changed while building, and why)
+
+- **No external chart library.** The plan said "vendor uPlot". We wrote our own small canvas chart helper instead (`static/js/chart.js`): no download, no dependency, works offline. Same for the thermal color palette (own inferno lookup).
+- **Monitor redesigned (Alan's feedback after Checkpoint 1):** the video took over the screen and he wanted to compare graphs without scrolling and disliked the neon look. Now: a small zoomed nose/cheek view (Full frame and Face/Scene colors one click away), a fixed-height status bar instead of a pop-in alarm banner (so alarms never shift the layout), and three graphs (signal, rate vs truth, breathing strength vs threshold) on ONE shared time axis with 30 s / 60 s / whole-recording windows; fits one screen from 1280x720. Palette is flat graphite with muted teal/amber/red used only for meaning; no glows or pulsing.
+- **Extra endpoints** beyond the plan: `GET /api/spectrum` and `GET /api/window` (so the Pipeline view shows the real estimator's spectrum, peaks and numbers). `rate.py` exposes `window_spectrum` and `window_peaks` for this (no behavior change).
+- **Lab additions:** seven one-click presets, a recording-length slider, and a server-generated verdict + plain-language notes (so wording is tested, and based on measured results). Slider limits clamp dependent values (the pause must end before the recording does).
+- **Detector fix found through the Lab:** pause labeling apnea vs signal_lost now uses the best recent quality plus a strength floor (see `THERMAL_SPEC.md` log, step D). Phase 4 numbers unchanged; one Phase 4b cell changed (33 degC, head moving).
+- **Pipeline/Lab views are built lazily** on first visit so they do not move the Monitor's playhead; `state.loadRun` swaps the run shown by Monitor and Pipeline ("Watch this in the Monitor").
+- **Light theme dropped** (Alan chose dark; tokens are in `static/css/app.css` so a re-skin is small).
+
+## Still to build (details unchanged in Sections 4-11)
+
+- **E:** Results & limits UI (cards from `/api/results` + the honest-limits list in `app/results.py`) and the guided tour (12 steps, Section 5; Next/Back; panel highlights; free explore always one click away).
+- **F:** `devices.py` (USB-identity detection, never opens a camera), `live.py` (rolling buffer, re-run the batch pipeline every 1-2 s, WebSocket, labeled "windowed, not causal"), Device screen, ROI picker (replaces OpenCV `selectROI`), Record to `data/`. Tests only with injected fakes. Lepton USB IDs and the whole read path are unverified (spec Section 11).
+- **G:** visual check at exactly 1920x1080 and in Full-scene colors; README section; anything Alan asks for after the team sees the recording.
 
 ---
 
@@ -45,6 +77,8 @@ It is also the first draft of the **product's software side**: the screen a clin
 - No standalone shareable HTML copy. If wanted later, it is a separate project.
 
 ## 4. What the viewer sees (screens)
+
+> As built, the Monitor layout differs from the first sketch below: see "Deviations from the plan" above. The Pipeline and Lab screens match the plan, with the additions listed there.
 
 Top bar: title, a **persistent data-source badge**, the Tour button, and navigation tabs.
 
@@ -97,16 +131,16 @@ Rerun target: under about 3 s for a 150 s recording; the default story (420 s) i
 
 ```
 thermal/
-  app/
-    __init__.py
-    server.py        # FastAPI app: API + serves static UI, binds 127.0.0.1 only
-    scenarios.py     # named scenarios (default story) + slider params -> SyntheticConfig
-    service.py       # runs run_pipeline, caches results, builds per-stage payloads
-    devices.py       # SAFE camera detection (no frame access) + LeptonSource wiring
-    live.py          # live session: windowed re-processing of a rolling buffer
-    static/          # index.html, css, js, vendored libs (no build step, works offline)
-  scripts/run_app.py # one command: python scripts/run_app.py -> opens the browser
-  tests/test_app_*.py
+  src/thermal/app/
+    scenarios.py     # slider schema, presets, parameter validation -> SyntheticConfig (BUILT)
+    service.py       # runs run_pipeline, caches by parameter hash, builds payload + spectrum/window analysis + verdict/notes (BUILT)
+    results.py       # report tables + honest-limits list (BUILT; UI not yet)
+    server.py        # FastAPI, 127.0.0.1 only: /api/{health,schema,run,frames,spectrum,window,results} (BUILT)
+    devices.py       # SAFE camera detection (no frame access)  (NOT BUILT: step F)
+    live.py          # live session: windowed re-processing of a rolling buffer  (NOT BUILT: step F)
+    static/          # index.html, css/app.css, js/{main,monitor,pipeline,lab,player,chart,util}.js (BUILT; no build step)
+  scripts/run_app.py # one command: python scripts/run_app.py (BUILT)
+  tests/test_app_api.py (BUILT)   # device/live tests come with step F
 ```
 
 - **Backend:** FastAPI + uvicorn (new optional dependency group `app` in `pyproject.toml`). It calls the existing modules (`SyntheticSource`, `run_pipeline`, `ApneaConfig`, ...). No pipeline logic is duplicated in the UI.
@@ -172,7 +206,7 @@ Each step is committed on `thermalexploration` and the session log in `THERMAL_S
 
 ## 13. Risks and open questions
 
-- **Slider rerun speed.** Simulating and processing 150 s takes a couple of seconds; if too slow, shorten the interactive window or cache by parameter hash.
+- **Slider rerun speed.** RESOLVED: a 180 s recording reruns in about 0.2-1 s (cached by parameter hash); the Lab debounces 300 ms and cancels stale requests.
 - **USB IDs for the Lepton breakout are from memory.** Detection may miss the real device until confirmed; the manual index field is the fallback.
 - **Live path is a best guess** (see `THERMAL_SPEC.md` Section 11). It will say "unverified" on screen until hardware day.
 - **Windowed live processing is not real-time-causal.** Acceptable for a proof of concept; flagged in the UI.

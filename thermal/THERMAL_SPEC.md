@@ -10,7 +10,85 @@
 
 **Rules:** never push to `main` until Alan says so; push only to feature branches. Newest entry on top.
 
-**Current state:** Phases 0-6 and 4b complete and pushed. Interactive demo app (`DEMO_APP_SPEC.md`): steps A, B (Monitor), C (Pipeline view) pushed; **D (Lab sliders = Checkpoint 2) built, awaiting review**. Next: E (Results & limits page + guided tour), F (Device screen), G (polish). Phase 7 (bring-up docs) follows the app.
+**Last updated:** 2026-11-10 (session ran 13:38-18:36 local), branch `thermalexploration`, all work pushed. `main` has never been touched by us.
+
+## >>> START HERE (next session) <<<
+
+**State in one paragraph.** The simulation-first thermal pipeline (spec Phases 0-6 plus the 4b incubator study) is complete, tested (146 tests) and pushed. On top of it we built an interactive demo app (`DEMO_APP_SPEC.md`): backend + Monitor, Pipeline and Lab screens are done and pushed; Alan screen-recorded it and is sending it to the team. Still to build: the Results & limits page and guided tour (step E), the Device screen with safe camera detection and live mode (step F), polish (step G), and spec Phase 7 (hardware bring-up docs; `scripts/bringup_lepton.md` is still a placeholder). No camera exists yet, so EVERYTHING is simulated and badged as such.
+
+**How to run (takes 1 minute):**
+```bash
+cd thermal
+pip install -e ".[dev,app]"       # Python 3.11+
+python -m pytest                  # 146 tests, about 22 s
+python scripts/run_app.py         # the interactive app at http://127.0.0.1:8765 (Monitor, Pipeline, Lab tabs)
+python scripts/run_synthetic_demo.py   # the one-command report + figures (about 10 s)
+```
+
+**Do next, in this order** (ask Alan before starting; stop at each checkpoint, as before):
+1. **Step E: Results & limits page + guided tour.** Data endpoint `GET /api/results` already exists (reads `figures/*_report.md`, plus the honest-limits list in `app/results.py`); the UI tab is a placeholder. Tour script is in `DEMO_APP_SPEC.md` Section 5 (12 steps, Next/Back, highlights panels, free-explore always available); the "Guided tour" button in the header is disabled.
+2. **Step F: Device screen + live mode.** Safe detection by USB identity (never open a camera until Connect; on a Mac probing indexes turns on the webcam), `devices.py` + `live.py` (rolling 60-90 s buffer, re-run the batch pipeline every 1-2 s, WebSocket), ROI picker, Record to gitignored `data/`. Test ONLY with injected fakes (`LeptonSource(capture_factory=...)`); no test may open a real device. Lepton USB IDs are from memory (unverified).
+3. **Step G: polish.** Check 1920x1080 exactly, Full-scene color mode, README, light tweaks Alan asks for.
+4. **Phase 7:** write `scripts/bringup_lepton.md` (spec Section 10 checklist + test protocol, referencing `TimestampLogger`, `raw_to_celsius`, `FileSource`, `record`, and the Section 11 unverified assumptions).
+
+**Decisions waiting on Alan (not made yet):**
+- 20 s pauses: detected 26-28 of 30 (a 20 s pause sits on the detector's 20 s minimum). `ApneaConfig.duration_tol_s` is 1.5 s; 3 s catches all 30 but also flags 17 s pauses 57% of the time. Currently the stricter setting.
+- Whether to commit a small sample of the Section 7 processed `.npz` for the fusion/CNN teammates (currently gitignored in `data/`; they regenerate with `run_synthetic_demo.py`).
+- Whether head-motion tracking should be prioritized (it is the biggest factor for pause detection in a warm incubator).
+- Hardware: any radiometric thermal camera loan, and a Lepton 2.5 + USB breakout order (open action for the human; spec Section 11).
+
+**Working rules Alan set (keep following):** (1) never push to `main` or merge into it until Alan says so; push only to feature branches. (2) Ask before every push; he says "Yes, push". (3) One phase/step at a time, stop for review. (4) Keep all code inside `thermal/`. (5) Update this log with every commit/push and every break. (6) Label simulated results as simulated everywhere; never present simulation as measurement. (7) Explain choices in plain language, one or two concepts at a time. (8) Commit messages end with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`.
+
+**Gotchas:**
+- A stale app server can hold port 8765 (`lsof -nP -iTCP:8765 -sTCP:LISTEN`, then kill it); the preview tool then moves to 8766. `.claude/launch.json` (preview config) is untracked on purpose.
+- The browser pane used for visual checks pauses animation frames until a screenshot is taken; it once looked like a layout bug and was not.
+- `pytest` reads `figures/*_report.md` (results endpoint test): do not run tests while `phase4_report.py` / `sweep_ambient.py` are rewriting them.
+- Untracked `.DS_Store` files are ignored by choice (root `.gitignore` is the team's).
+- `rate_variability` (5%) makes a window's "true rate" ambiguous, so spectral error at high rates is partly the simulator's wander (spec log, Phase 3).
+
+**What exists (as built; spec Section 5 shows the original plan):**
+```
+thermal/
+  THERMAL_SPEC.md   this file (science + living session log)      DEMO_APP_SPEC.md   plan + build status of the app
+  README.md         how to run                                      pyproject.toml     extras: dev, app
+  src/thermal/      config, sources/{base,synthetic,file_source,lepton}, recorder, roi, ffc, preprocess, rate, quality,
+                    metrics, apnea, pipeline, viz, app/{scenarios,service,results,server}.py + app/static/{index.html,css,js}
+  scripts/          run_app.py, run_synthetic_demo.py, sweep_ambient.py, phase3_report.py, phase4_report.py,
+                    plot_*.py, bringup_lepton.md (PLACEHOLDER)
+  tests/            11 files, 146 tests         figures/   committed PNGs + *_report.md          data/   gitignored raw recordings
+```
+
+### Commit history (2026-11-10, local time) and what each one is
+| commit | time | what |
+|---|---|---|
+| 0db2c3f, 3422334 | 13:38, 13:54 | Team's initial commit and Kinect depth project (not ours) |
+| 00f6788 | 14:00 | Spec added to `thermal/` on branch `thermalexploration` |
+| 5607c27 | 14:08 | Phase 0: scaffold, config, FrameSource, tests, session log |
+| 3d41896 | 14:52 | Phase 1: synthetic thermal generator with ground truth |
+| 9336eeb | 15:42 | 5-second frame-strip figure (explains the signal) |
+| f6733af | 15:45 | Phase 2: ROI reduction, FFC handling, preprocessing |
+| 5ac9b63 | 16:48 | Step-by-step Phase 2 cleaning figure |
+| b8605e5 | 16:56 | Phase 3: rate estimators, quality index, metrics |
+| c531096 | 17:07 | Phase 4: apnea detector + signal_lost |
+| b7eaccd | 17:26 | Phase 4b: incubator temperature sweep (model prediction) |
+| dc3d662 | 17:32 | Phase 5: recorder, FileSource, LeptonSource, pipeline runner |
+| cb9ed59 | 17:38 | Phase 6: one-command demo, Section 7 output file |
+| 4ffc39c | 17:48 | Plan for the interactive demo + device app (`DEMO_APP_SPEC.md`) |
+| 50b3975 | 18:02 | App steps A+B: backend + Monitor (Checkpoint 1) |
+| 6330053 | 18:12 | Monitor redesign from Alan's feedback (one screen, calm palette); Checkpoint 1 pushed |
+| d1b392e | 18:22 | App step C: Pipeline view (7 stages) |
+| f469f9d | 18:36 | App step D: Lab (Checkpoint 2) + apnea-labeling fix |
+| (wrap-up) | end of session | Docs: START HERE block, history, decisions, README, app spec status |
+
+### Decisions log (what we chose and why)
+- **Simulation-first** (no camera yet): validate the whole pipeline on a physics-based synthetic video with known ground truth; hardware sits behind a `FrameSource` interface so nothing downstream changes. (Phase 1, 14:52)
+- **Breathing swing model** A = 0.07 x (34.5 degC exhaled - ambient): chosen to give 0.74 degC at 24 degC; UNVERIFIED on hardware. Every incubator conclusion depends on it. (Phase 1/4b)
+- **Reference ROI subtraction** removes both drift and FFC level jumps; frozen frames are interpolated; detector uses whole-scene mean steps (breathing only moves an 18-pixel patch). (Phase 2)
+- **Two rate estimators** (spectral + time-domain) with a quality score; below 50% quality a number is withheld instead of guessed. Time-domain was more accurate at every rate; it is the default in the output file. (Phase 3)
+- **Apnea detector**: envelope below 25% of a frozen-during-pause rolling baseline for >= 20 s (1.5 s tolerance); envelope lag is back-dated by the derived (1 - k^2) x window formula; `signal_lost` means very low strength AND low quality with no good recent breathing. A pause is `apnea` only if the best recent window had quality >= 0.7 AND normal strength was above the 0.05 degC floor (fixed after the Lab showed the old average-quality rule was fragile after a rate change). (Phases 4, D)
+- **Honest reporting**: where a spec target is not met we say so (20 s pauses 26-28 of 30; spectral worst-window error at high rates) instead of tuning until it passes.
+- **App**: local web app (FastAPI + plain JS, no build step, no external libraries so it works offline), real pipeline behind every plot, permanent SIMULATED badge, camera never opened without an explicit Connect. Monitor redesigned after feedback: small zoomed nose view, three graphs on one shared time axis, one screen without scrolling, flat calm palette (no neon). Pipeline view order and wording written for non-experts. Lab verdict and notes are generated on the server from measured results so they are tested. Phase 7 moved after the app. (2026-11-10, 17:48-18:36)
+- **Safety**: tests never open a real device; recordings load with `allow_pickle=False`; raw face recordings only under gitignored `data/`; server binds 127.0.0.1 only.
 
 ### 2026-11-10 · branch `thermalexploration` · Demo app step D: Lab (Checkpoint 2) + an apnea-labeling fix
 - **Done:** a **Lab** tab: every control from the server's schema as sliders/switches/choices (breathing rate, optional rate change, optional pause with start and length, incubator temperature, sensor noise, head movement, camera recalibration, detector's shortest pause, recording length), seven one-click setups (default story, warm incubator 31 degC, hot incubator 35 degC, newborn 60/min, lots of head movement, noisy sensor 3x, short 12 s pause), and a live rerun of the REAL pipeline about 0.3 s after each change (an "Updating..." pill, stale requests cancelled, invalid combinations clamped or explained). Results: a verdict (green/amber/red), five tiles (pause found, rate error, no reading, signal lost, glitches), up to four plain-language notes (written on the server from the measured results, so they are tested), and the whole recording as three aligned graphs. "Watch this in the Monitor" loads the scenario into the Monitor (and Pipeline) at 0:00. 146 tests pass.
