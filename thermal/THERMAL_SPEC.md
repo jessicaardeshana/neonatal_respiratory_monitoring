@@ -10,7 +10,14 @@
 
 **Rules:** never push to `main` until Alan says so; push only to feature branches. Newest entry on top.
 
-**Current state:** Phase 0 complete (awaiting review). Next: Phase 1, synthetic generator.
+**Current state:** Phase 1 complete (awaiting review). Next: Phase 2, preprocessing + FFC handling.
+
+### 2026-11-10 · branch `thermalexploration` · Phase 1 synthetic generator
+- **Done:** `sources/synthetic.py` implements Section 6.2: face blob + nostril patch, non-sinusoidal breath (sine + 2nd harmonic), thermal lag (tau 0.3 s), amplitude scaling with (exhale - ambient), constant/step/variable rate, apnea windows with 1 s ramps, and toggleable noise, drift, head jitter, FFC (frozen frames + persistent offset step), timestamp jitter, dropped frames. Returns frames, timestamps and a `GroundTruth` (rate, apnea mask, ROI boxes, FFC indices). `SyntheticSource` implements `FrameSource`. `viz.phase1_overview` + `scripts/plot_phase1.py` make `figures/phase1_synthetic_overview.png` (a: frame with ROIs, b: oscillating signal, c: apnea, d: FFC glitch). 19 tests pass.
+- **Decisions:** each nuisance has its own random stream (toggling one does not change another; fixed seed is reproducible). Default amplitude gain 0.07 degC per degC gives A = 0.74 degC at 24 degC ambient, about 0.04 at 34 degC and 0 at 36 degC (the incubator effect). Ground truth also includes a control ROI (cheek) and reference ROI (background corner) for Phase 2. FFC freezes repeat the previous frame, and the offset step persists until the end of the recording.
+- **Known quirk:** head jitter shifts the face by 1 px, and because the cheek control ROI sits on a temperature gradient, its mean shows small steps (about 0.1-0.4 degC). This is a motion artifact the pipeline must tolerate, not a breathing peak. Jitter rate is configurable (`head_jitter_prob`, default 0.01 per frame).
+- **Open issues:** all numbers are simulated from unverified datasheet recall. The face gradient and jitter size are modeling guesses, not measurements.
+- **Next step:** Phase 2 (Sections 6.3-6.5): FFC detection/repair, ROI reduction, resample/detrend/band-pass. Stop for review after it.
 
 ### 2026-11-10 · branch `thermalexploration` · Phase 0 scaffold
 - **Done:** created the `thermal/` tree from Section 5 (package, `pyproject.toml`, config dataclasses with adult/neonate profiles, `FrameSource` protocol, placeholder modules and scripts). `thermal/.gitignore` keeps `thermal/data/` out of git. `pytest` runs: 4 tests pass.
