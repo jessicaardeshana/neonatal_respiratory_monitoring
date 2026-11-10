@@ -20,7 +20,7 @@ from fastapi.staticfiles import StaticFiles
 
 from thermal import __version__
 from thermal.app.results import load_results
-from thermal.app.scenarios import SCHEMA, ScenarioParams
+from thermal.app.scenarios import PRESETS, SCHEMA, ScenarioParams
 from thermal.app.service import FRAME_COLS, FRAME_ROWS, Service
 
 STATIC = Path(__file__).parent / "static"
@@ -38,7 +38,7 @@ def create_app(service: Service | None = None) -> FastAPI:
 
     @app.get("/api/schema")
     def schema() -> dict:
-        return {"controls": SCHEMA, "defaults": ScenarioParams().model_dump()}
+        return {"controls": SCHEMA, "defaults": ScenarioParams().model_dump(), "presets": PRESETS}
 
     @app.post("/api/run")
     def run(params: ScenarioParams) -> dict:

@@ -2,11 +2,12 @@
 import { h, clamp } from "./util.js";
 import { buildMonitor } from "./monitor.js";
 import { buildPipeline } from "./pipeline.js";
+import { buildLab } from "./lab.js";
 
 const TABS = [
   { id: "monitor", label: "Monitor", ready: true },
   { id: "pipeline", label: "Pipeline", ready: true },
-  { id: "lab", label: "Lab", ready: false, blurb: "Sliders for breathing rate, pauses, incubator temperature, noise, head movement and camera glitches. Watch the result change." },
+  { id: "lab", label: "Lab", ready: true },
   { id: "results", label: "Results & limits", ready: false, blurb: "Accuracy numbers, the incubator study, and an honest list of what is not met or not tested yet." },
   { id: "device", label: "Device", ready: false, blurb: "Detect a thermal camera when one is plugged in and show the live feed through the same pipeline." },
 ];
@@ -42,6 +43,7 @@ async function boot() {
   const controllers = { monitor };
   views.monitor = h("section", { class: "view", id: "view-monitor" }, monitor.el);
   views.pipeline = h("section", { class: "view", id: "view-pipeline", hidden: true });
+  views.lab = h("section", { class: "view", id: "view-lab", hidden: true });
   for (const t of TABS.filter(t => !t.ready)) {
     views[t.id] = h("section", { class: "view", id: `view-${t.id}`, hidden: true },
       h("div", { class: "card placeholder" }, h("div", {}, h("h2", {}, t.label), h("p", {}, t.blurb), h("p", { style: "margin-top:14px;color:var(--faint)" }, "Coming in the next build steps."))));
@@ -57,9 +59,19 @@ async function boot() {
     TABS.forEach((t, i) => { buttons[i].setAttribute("aria-selected", String(t.id === id)); views[t.id].hidden = t.id !== id; });
     if (id === "pipeline" && !controllers.pipeline) {  // built on first visit so it does not move the Monitor's playhead
       controllers.pipeline = buildPipeline(state); views.pipeline.append(controllers.pipeline.el); controllers.pipeline.setRun(state.run);
-    } else controllers[id]?.enter?.();
+    }
+    if (id === "lab" && !controllers.lab) { controllers.lab = buildLab(state); views.lab.append(controllers.lab.el); controllers.lab.start(); }
+    controllers[id]?.enter?.();
     state.dirty = true;
   }
+
+  // swap the run shown by the Monitor and Pipeline (used by the Lab's "Watch in Monitor")
+  state.loadRun = run => {
+    state.pause(); state.run = run; state.t = 0;
+    document.querySelector("#source-badge span").textContent = run.source.label;
+    monitor.setRun(run); controllers.pipeline?.setRun(run); state.dirty = true;
+  };
+  state.goto = select;
 
   addEventListener("keydown", e => {
     if (e.target.closest("input, select, textarea") || !controllers[state.tab]) return;

@@ -80,7 +80,7 @@ function drawLanes(canvas, { x, t, lanes }) {
 }
 
 export function buildPipeline(state) {
-  let run = null, stageIdx = 0, win = WINDOWS[0], compare = "stacked", slots = [], wData = null, sData = null, wKey = "", sKey = "", wBusy = false, sBusy = false;
+  let run = null, pendingFocus = true, stageIdx = 0, win = WINDOWS[0], compare = "stacked", slots = [], wData = null, sData = null, wKey = "", sKey = "", wBusy = false, sBusy = false;
   const root = h("div", { class: "pipe" });
 
   // ---- stepper (left)
@@ -325,9 +325,21 @@ export function buildPipeline(state) {
     scrub.value = String(Math.round(t / run.meta.duration_s * 1000));
   }
 
+  function applyStage() {
+    const s = STAGES[stageIdx];
+    stepBtns.forEach((b, k) => b.setAttribute("aria-current", String(k === stageIdx)));
+    stageTitle.textContent = `${stageIdx + 1}. ${s.title}`;
+    ex.what.textContent = s.what; ex.why.textContent = s.why; ex.how.textContent = s.how; ex.look.textContent = s.look;
+    cmpSeg.style.display = s.compare ? "" : "none";
+  }
   return {
     el: root,
-    setRun(r) { run = r; player.setRun(r); wData = sData = null; wKey = sKey = ""; renderChips(); select(stageIdx); },
-    update, relayout() {}, enter() { if (state.t < 5 && run) select(stageIdx); },
+    setRun(r) { run = r; player.setRun(r); wData = sData = null; wKey = sKey = ""; pendingFocus = true; renderChips(); applyStage(); build(); },
+    update, relayout() {},
+    enter() {  // jump to a good moment the first time a (new) run is shown here
+      if (!run) return;
+      if (pendingFocus) { pendingFocus = false; if (!state.playing) state.seek(focusFor(STAGES[stageIdx].id) ?? state.t); }
+      build(); state.redraw();
+    },
   };
 }

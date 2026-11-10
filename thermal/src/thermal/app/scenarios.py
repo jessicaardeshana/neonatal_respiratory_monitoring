@@ -65,6 +65,19 @@ SCHEMA = [
      "help": "The camera freezes for a moment and its level jumps. Sped up here so one shows within the demo."},
     {"key": "min_pause_s", "label": "Detector: shortest pause", "kind": "range", "min": 5, "max": 40, "step": 1, "unit": "s",
      "help": "Clinical apnea is a pause of 20 s or more."},
+    {"key": "duration_s", "label": "Recording length", "kind": "range", "min": 60, "max": 240, "step": 30, "unit": "s",
+     "help": "Longer recordings take a little longer to compute."},
+]
+
+# One-click demo setups: parameter overrides applied on top of the default story.
+PRESETS = [
+    {"id": "story", "label": "Default story", "desc": "Normal breathing, speed-up, a pause, recovery.", "params": {}},
+    {"id": "warm", "label": "Warm incubator (31 °C)", "desc": "Rate still tracks, but head movement can hide the pause. Try Head movement: Still.", "params": {"ambient_c": 31.0}},
+    {"id": "hot", "label": "Hot incubator (35 °C)", "desc": "Exhaled air and room are the same temperature: no signal.", "params": {"ambient_c": 35.0}},
+    {"id": "newborn", "label": "Newborn breathing (60/min)", "desc": "Fast breathing, newborn filter band.", "params": {"rate_bpm": 60.0, "rate_change": False}},
+    {"id": "movement", "label": "Lots of head movement", "desc": "Frequent one-pixel shifts of the head.", "params": {"head": "large"}},
+    {"id": "noisy", "label": "Noisy sensor (3×)", "desc": "Three times the default pixel noise.", "params": {"noise_x": 3.0}},
+    {"id": "short", "label": "Short pause (12 s)", "desc": "Shorter than the 20 s clinical definition: should not alarm.", "params": {"apnea_len_s": 12.0}},
 ]
 
 

@@ -50,7 +50,7 @@ class ApneaConfig:
     baseline_s: float = 180.0  # baseline = median envelope over this span
     warmup_s: float = 30.0  # envelope history needed before any flag
     abs_floor_c: float = 0.05  # "very low" envelope for signal_lost (degC RMS)
-    q_good: float = 0.7  # quality before a pause that makes it apnea
+    q_good: float = 0.7  # best recent window quality needed for a pause to count as apnea
     q_low: float = 0.5  # quality below this = "very low SNR" (the rate estimator's reject level)
     duration_tol_s: float = 1.5  # slack on min_duration for envelope-window blur
     lookback_s: float = 30.0  # window "immediately before" a pause
@@ -168,7 +168,10 @@ def detect_apnea(t: np.ndarray, x: np.ndarray, fs: float, profile: Profile,
             continue
         past = qual[max(0, s - int(cfg.lookback_s * fs)) : s]
         past = past[np.isfinite(past)]
-        good = past.size > 0 and past.mean() >= cfg.q_good
+        # "good breathing immediately before": at least one recent window had clean breathing (best quality,
+        # not the average: windows straddling a rate change score low but the breathing was still there) AND the
+        # normal strength before the pause was above the "very low" floor (a marginal signal is not a real baseline).
+        good = past.size > 0 and past.max() >= cfg.q_good and bool(np.isfinite(base[s]) and base[s] >= cfg.abs_floor_c)
         declared = max(float(t[s]), float(t[s]) + need - lag_start)
         events.append(ApneaEvent(start, end, "apnea" if good else "signal_lost", declared))
         covered[s:e] = True

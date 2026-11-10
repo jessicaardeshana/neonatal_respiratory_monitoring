@@ -255,3 +255,64 @@ def test_analysis_endpoints_reject_bad_requests(client, story):
     assert client.get("/api/spectrum", params={"run": rid, "t0": 0, "t1": 3}).status_code == 400
     assert client.get("/api/window", params={"run": "nope", "t_end": 60}).status_code == 404
     assert client.get("/api/spectrum", params={"run": "nope", "t0": 0, "t1": 60}).status_code == 404
+
+
+# ---- Lab: presets, verdicts and plain-language notes ----------------------------------------
+def test_schema_offers_presets_and_recording_length(client):
+    s = client.get("/api/schema").json()
+    ids = [p["id"] for p in s["presets"]]
+    assert len(ids) == len(set(ids)) and {"story", "warm", "hot", "newborn", "movement", "noisy", "short"} <= set(ids)
+    for p in s["presets"]:
+        ScenarioParams(**{**s["defaults"], **p["params"]})  # every preset is a valid scenario
+    assert "duration_s" in {c["key"] for c in s["controls"]}
+    assert next(p for p in s["presets"] if p["id"] == "story")["params"] == {}
+
+
+def _preset(client, pid):
+    s = client.get("/api/schema").json()
+    params = next(p for p in s["presets"] if p["id"] == pid)["params"]
+    return client.post("/api/run", json=params).json()
+
+
+def test_default_story_gets_a_good_verdict(story):
+    assert story["verdict"]["level"] == "good"
+    assert any(n["kind"] == "good" and "pause was detected" in n["text"] for n in story["notes"])
+
+
+def test_hot_incubator_verdict_says_the_signal_is_gone_and_does_not_cry_false_alarm(client):
+    r = _preset(client, "hot")
+    assert r["verdict"]["level"] == "bad" and "cannot be seen" in r["verdict"]["title"].lower()
+    text = " ".join(n["text"] for n in r["notes"])
+    assert "signal lost" in text and "too weak" in text
+    assert r["summary"]["false_events"] == 0  # signal_lost events are not false apnea alarms
+    assert all(e["kind"] == "signal_lost" for e in r["stages"]["apnea"]["events"])
+
+
+def test_short_pause_correctly_raises_no_alarm_and_the_notes_say_so(client):
+    r = _preset(client, "short")
+    assert r["verdict"]["level"] == "good" and r["stages"]["apnea"]["events"] == []
+    assert any("shorter than the detector" in n["text"] and n["kind"] == "good" for n in r["notes"])
+
+
+def test_warm_incubator_miss_is_blamed_on_head_movement_and_head_still_fixes_it(client):
+    warm = _preset(client, "warm")  # 31 degC, default (small) head movement
+    assert warm["verdict"]["level"] == "bad" and warm["summary"]["pauses_found"] == 0
+    assert any("Head movement" in n["text"] for n in warm["notes"])
+    still = client.post("/api/run", json={"ambient_c": 31.0, "head": "off"}).json()
+    assert still["summary"]["pauses_found"] == 1 and still["verdict"]["level"] == "good"
+
+
+def test_a_pause_in_the_first_minute_is_explained_not_blamed_on_something_else(client):
+    r = client.post("/api/run", json={"duration_s": 90, "apnea_start_s": 25, "apnea_len_s": 25, "rate_change": False}).json()
+    if r["summary"]["pauses_found"] == 0:
+        assert any("learn what normal is" in n["text"] for n in r["notes"])
+
+
+def test_newborn_and_noisy_and_movement_presets_work_as_intended(client):
+    for pid in ("newborn", "noisy", "movement"):
+        assert _preset(client, pid)["verdict"]["level"] == "good", pid
+
+
+def test_notes_are_prioritized_warnings_first(client):
+    kinds = [n["kind"] for n in _preset(client, "hot")["notes"]]
+    assert kinds == sorted(kinds, key=lambda k: {"warn": 0, "good": 1, "info": 2}[k])

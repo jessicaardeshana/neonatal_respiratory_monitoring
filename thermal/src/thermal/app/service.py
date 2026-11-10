@@ -165,7 +165,7 @@ class Service:
         _, ref_u = resample_uniform(ft, s_r, cfg.fs_nominal)
         _, rep_n_u = resample_uniform(ft, rep_n, cfg.fs_nominal)
         _, rep_r_u = resample_uniform(ft, rep_r, cfg.fs_nominal)
-        return {
+        payload = {
             "run_id": run_id,
             "source": {"kind": "simulation", "label": "SIMULATED DATA"},
             "params": p.model_dump(),
@@ -206,15 +206,77 @@ class Service:
                       "pauses": [[round(a, 2), round(b, 2)] for a, b in pauses],
                       "ffc_step_times": _list(ft[tr.ffc_step_indices], 2),
                       "breath_swing_c": round(float(tr.amplitude_c), 3), "ambient_c": cfg.ambient_c},
+            "verdict": None, "notes": [],  # filled below, from the summary
             "summary": {
                 "pauses_injected": len(pauses), "pauses_found": len(pauses) - sc["missed"],
-                "false_events": score_events(pauses, [(e.start, e.end) for e in ap.events])["false_alarms"],
+                "false_events": score_events(pauses, [(e.start, e.end) for e in ap.events if e.kind == "apnea"])["false_alarms"],  # apnea alarms only
                 "start_err_s": [round(x, 1) for x in sc["start_err"]], "end_err_s": [round(x, 1) for x in sc["end_err"]],
                 "rate_mae_time": _num(mae(est.time_bpm, rate_wt, ok)), "rate_mae_spectral": _num(mae(est.spectral_bpm, rate_wt, ok)),
                 "rate_answered": _coverage(est.time_bpm, ok), "signal_lost_fraction": round(float(ap.signal_lost.mean()), 3),
                 "ffc_injected": int(tr.ffc_step_indices.size), "ffc_detected": int(sig.ffc_step_times.size),
             },
         }
+        return _finish(payload, p)
+
+
+def _finish(payload: dict, p: ScenarioParams) -> dict:
+    payload["verdict"], payload["notes"] = explain(p, payload["summary"], payload["truth"]["breath_swing_c"],
+                                                   payload["meta"].get("profile_warning"))
+    return payload
+
+
+def explain(p: ScenarioParams, sm: dict, swing: float, profile_warning: str | None) -> tuple[dict, list[dict]]:
+    """Plain-language verdict and notes for a run, from its measured summary (not from the parameters alone)."""
+    lost = sm["signal_lost_fraction"] or 0.0
+    answered = sm["rate_answered"] if sm["rate_answered"] is not None else 0.0
+    inj, found = sm["pauses_injected"], sm["pauses_found"]
+    notes: list[dict] = []
+    if lost > 0.3:
+        notes.append({"kind": "warn", "text": f"The software could not see breathing for {round(lost * 100)}% of the recording and "
+                                                "reported 'signal lost' instead of guessing."})
+    elif answered < 0.9:
+        notes.append({"kind": "warn", "text": f"No reliable breathing rate in {round((1 - answered) * 100)}% of the 30 s windows "
+                                                "(quality below 50%, so no number was shown)."})
+    if inj:
+        too_short = p.apnea_len_s < p.min_pause_s + 1.5
+        if found == inj:
+            se, ee = (sm["start_err_s"] or [None])[0], (sm["end_err_s"] or [None])[0]
+            notes.append({"kind": "good", "text": f"The pause was detected, with its start off by {se:+.1f} s and its end by {ee:+.1f} s."})
+        elif too_short:
+            notes.append({"kind": "good", "text": f"The {p.apnea_len_s:g} s pause is shorter than the detector's {p.min_pause_s:g} s minimum, "
+                                                  "so no alarm is raised. That is intended."})
+        else:
+            if p.apnea_start_s < 45:
+                why = ("The detector needs about 35 s of normal breathing first to learn what normal is, "
+                       "so a pause this early cannot be judged.")
+            elif lost > 0.3:
+                why = "The breathing signal was too weak to notice it stop."
+            elif p.head != "off" and swing < 0.5:
+                why = ("Head movement is the likely cause: each shift leaves a bump in the signal that can cut a pause into pieces "
+                       "too short to flag, and a warm incubator makes the breathing swing small enough for that to matter. "
+                       "Try Head movement: Still.")
+            else:
+                why = "The detector estimated the pause as slightly shorter than its minimum."
+            notes.append({"kind": "warn", "text": f"Pause missed ({found} of {inj} detected). {why}"})
+    if sm["false_events"]:
+        notes.append({"kind": "warn", "text": f"{sm['false_events']} apnea alarm(s) were raised with no real pause."})
+    if sm["rate_mae_time"] is not None and answered >= 0.9:
+        notes.append({"kind": "good", "text": f"Breathing rate tracked to within {sm['rate_mae_time']:.1f} breaths/min on average."})
+    notes.append({"kind": "info", "text": f"At {p.ambient_c:g} °C the breathing swing at the nose is about {swing:.2f} °C "
+                                          "(0.74 °C at 24 °C, zero at 34.5 °C)."})
+    if profile_warning:
+        notes.append({"kind": "warn", "text": profile_warning})
+
+    missed_all = inj > 0 and found == 0 and p.apnea_len_s >= p.min_pause_s + 1.5
+    if lost > 0.3 or missed_all:
+        verdict = {"level": "bad", "title": "Breathing cannot be seen reliably" if lost > 0.3 else "The pause was missed",
+                   "sub": "The signal is too weak" if lost > 0.3 else "No alarm was raised for a real pause"}
+    elif (inj and found < inj and p.apnea_len_s >= p.min_pause_s + 1.5) or sm["false_events"] or answered < 0.9:
+        verdict = {"level": "warn", "title": "Partly working", "sub": "Some results are missing or uncertain"}
+    else:
+        verdict = {"level": "good", "title": "Working as intended", "sub": "Rate tracked and pauses handled correctly"}
+    notes.sort(key=lambda n: {"warn": 0, "good": 1, "info": 2}[n["kind"]])
+    return verdict, notes
 
 
 def _fill(t: np.ndarray, x: np.ndarray) -> np.ndarray:

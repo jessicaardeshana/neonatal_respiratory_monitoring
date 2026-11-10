@@ -128,3 +128,21 @@ def test_score_events_counts_missed_false_alarms_and_fragments():
     sc = score_events(truth, det)
     assert sc["start_err"] == [1.0] and sc["end_err"] == [2.0]
     assert sc["missed"] == 1 and sc["false_alarms"] == 1 and sc["fragments"] == 1
+
+
+# ---- regression: a rate change shortly before a pause must not turn apnea into "signal_lost" ----------
+@pytest.mark.parametrize("seed", [2, 5, 7])
+@pytest.mark.parametrize("head", [True, False])
+def test_pause_20_s_after_a_speed_up_is_still_labeled_apnea(seed, head):
+    """Windows straddling a rate change score low on quality, but breathing was clearly there just before."""
+    res = generate(SyntheticConfig(duration_s=180, seed=seed, rate_bpm=14.0, rate_steps=((75.0, 24.0),),
+                                   apnea_events=((95.0, 25.0),), head_jitter=head, ffc_interval_s=(55.0, 85.0)))
+    r = _detect(res)
+    assert [e.kind for e in r.events] == ["apnea"]
+
+
+def test_marginal_signal_in_a_hot_incubator_is_signal_lost_never_apnea():
+    """Swing about 0.04 degC: the 'normal' level is below the very-low floor, so a pause cannot be called apnea."""
+    res = generate(SyntheticConfig(duration_s=240, seed=3, ambient_c=34.0, apnea_events=((100.0, 30.0),)))
+    r = _detect(res)
+    assert not any(e.kind == "apnea" for e in r.events)
