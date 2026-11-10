@@ -1,0 +1,20 @@
+[project]
+name = "thermal"
+version = "0.0.1"
+description = "Thermal respiratory sensing proof of concept (synthetic-first, hardware-ready)"
+requires-python = ">=3.11"
+dependencies = ["numpy", "scipy", "matplotlib", "opencv-python"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

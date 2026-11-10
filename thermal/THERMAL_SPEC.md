@@ -6,6 +6,20 @@
 
 ---
 
+## STATUS / SESSION LOG (read this first, update it with every commit/push and every break)
+
+**Rules:** never push to `main` until Alan says so; push only to feature branches. Newest entry on top.
+
+**Current state:** Phase 0 complete (awaiting review). Next: Phase 1, synthetic generator.
+
+### 2026-11-10 · branch `thermalexploration` · Phase 0 scaffold
+- **Done:** created the `thermal/` tree from Section 5 (package, `pyproject.toml`, config dataclasses with adult/neonate profiles, `FrameSource` protocol, placeholder modules and scripts). `thermal/.gitignore` keeps `thermal/data/` out of git. `pytest` runs: 4 tests pass.
+- **Decisions:** `.gitignore` lives in `thermal/` (not repo root) so nothing outside `thermal/` is touched. Placeholder modules are one-line docstrings until their phase. Installed with `pip install -e ".[dev]"` (Python 3.11).
+- **Open issues:** hardware specs in Section 4 are still unverified (they are flagged in `config.py`). No camera yet.
+- **Next step:** Phase 1, synthetic generator (Section 6.2). Stop for review after it.
+
+---
+
 ## 1. Project context (why this exists)
 
 The team is building a **contactless respiratory monitor for premature NICU infants**. Today's NICU monitors use skin-contact electrodes/stickers, which damage fragile skin, fall off, and produce many false alarms. We want continuous breathing monitoring with nothing attached to the baby.

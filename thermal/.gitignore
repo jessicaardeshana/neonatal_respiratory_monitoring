@@ -1,0 +1,6 @@
+# Raw thermal recordings are images of people's faces: never commit them.
+data/*
+!data/.gitkeep
+__pycache__/
+*.egg-info/
+.pytest_cache/
