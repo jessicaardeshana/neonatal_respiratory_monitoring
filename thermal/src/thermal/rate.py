@@ -35,9 +35,9 @@ class RateEstimate:
     snr_db: np.ndarray | None = None  # (K,) spectral SNR in dB (not gated)
 
 
-def _spectral_window(seg: np.ndarray, fs: float, band_hz: tuple[float, float],
-                     window_s: float, zero_pad: int = 8) -> tuple[float, float]:
-    """(peak frequency in Hz, linear SNR) for one window."""
+def window_spectrum(seg: np.ndarray, fs: float, band_hz: tuple[float, float], window_s: float,
+                    zero_pad: int = 8) -> tuple[np.ndarray, np.ndarray, float, float]:
+    """One window's spectrum: (freqs Hz, power, peak frequency Hz, linear SNR). Hann window, zero-padded."""
     n = seg.size
     nfft = int(2 ** np.ceil(np.log2(n * zero_pad)))
     x = (seg - seg.mean()) * np.hanning(n)
@@ -52,17 +52,29 @@ def _spectral_window(seg: np.ndarray, fs: float, band_hz: tuple[float, float],
         if denom != 0:  # parabolic interpolation of the log-power peak
             f_pk = f[k] + 0.5 * (a - c) / denom * (f[1] - f[0])
     snr = spectral_snr(f, power, band_hz, f_pk, half_width_hz=max(0.03, 2.0 / window_s))
-    return float(f_pk), snr
+    return f, power, float(f_pk), snr
 
 
-def _time_window(seg: np.ndarray, fs: float, profile: Profile) -> float:
-    """Breaths/min from the spacing of peaks in one window (NaN if < 3 peaks)."""
+def _spectral_window(seg: np.ndarray, fs: float, band_hz: tuple[float, float],
+                     window_s: float, zero_pad: int = 8) -> tuple[float, float]:
+    """(peak frequency in Hz, linear SNR) for one window."""
+    _, _, f_pk, snr = window_spectrum(seg, fs, band_hz, window_s, zero_pad)
+    return f_pk, snr
+
+
+def window_peaks(seg: np.ndarray, fs: float, profile: Profile) -> tuple[np.ndarray, float]:
+    """(peak sample indices, breaths/min) for one window; rate is NaN with fewer than 3 peaks."""
     min_dist = max(1, int(0.8 * fs * 60.0 / profile.rate_max_bpm))
     prom = 0.3 * (np.percentile(seg, 95) - np.percentile(seg, 5))
     peaks, _ = find_peaks(seg, distance=min_dist, prominence=max(prom, 1e-9))
     if peaks.size < 3:
-        return float("nan")
-    return 60.0 * (peaks.size - 1) / ((peaks[-1] - peaks[0]) / fs)
+        return peaks, float("nan")
+    return peaks, 60.0 * (peaks.size - 1) / ((peaks[-1] - peaks[0]) / fs)
+
+
+def _time_window(seg: np.ndarray, fs: float, profile: Profile) -> float:
+    """Breaths/min from the spacing of peaks in one window (NaN if < 3 peaks)."""
+    return window_peaks(seg, fs, profile)[1]
 
 
 def estimate_rates(t: np.ndarray, x: np.ndarray, fs: float, profile: Profile,

@@ -19,10 +19,13 @@ import numpy as np
 
 from thermal.app.scenarios import ScenarioParams, choose_profile, to_apnea, to_synthetic
 from thermal.config import PipelineConfig
+from thermal.ffc import detect_ffc, repair_invalid
 from thermal.metrics import mae, score_events, truth_on_grid, window_truth
 from thermal.pipeline import PipelineOutput, run_pipeline
-from thermal.rate import estimate_rates
-from thermal.roi import ROI
+from thermal.quality import agreement_factor, quality_from_snr
+from thermal.rate import estimate_rates, window_peaks, window_spectrum
+from thermal.preprocess import resample_uniform
+from thermal.roi import ROI, reduce_roi
 from thermal.sources.synthetic import SyntheticSource
 
 FRAME_ROWS, FRAME_COLS = 60, 80
@@ -79,6 +82,46 @@ class Service:
                 self._runs.popitem(last=False)
         return run
 
+    # ------------------------------------------------------------------ analysis for the Pipeline view
+    def spectrum(self, run: Run, t0: float, t1: float) -> dict:
+        """Amplitude spectrum (degC) of the signal before and after band-passing, over [t0, t1]."""
+        sig, fs = run.output.signals, run.source.fs_nominal
+        m = (sig.t >= t0) & (sig.t <= t1)
+        if m.sum() < int(8 * fs):
+            raise ValueError("Need at least 8 s of signal for a spectrum.")
+        profile = choose_profile(run.params)[0]
+        bpm = np.arange(0.0, 100.01, 0.25)
+        out = {"bpm": bpm.tolist(), "band_bpm": [profile.band_hz[0] * 60, profile.band_hz[1] * 60], "window_s": round(t1 - t0, 1)}
+        for name, x in (("clean", sig.s_clean[m]), ("filtered", sig.s_filt[m])):
+            out[name] = _list(_amp_spectrum(x, fs, bpm), 4)
+        return out
+
+    def window(self, run: Run, t_end: float) -> dict:
+        """What the rate estimator sees for the window ending at ``t_end``: signal, peaks, spectrum, rates, quality."""
+        sig, est, fs = run.output.signals, run.output.rate, run.source.fs_nominal
+        ws = est.window_s
+        m = (sig.t > t_end - ws) & (sig.t <= t_end)
+        if t_end < ws or m.sum() < int(0.9 * ws * fs):
+            raise ValueError(f"The first reading needs a full {ws:.0f} s window.")
+        profile = choose_profile(run.params)[0]
+        seg, tt = sig.s_filt[m], sig.t[m]
+        f, power, f_pk, snr = window_spectrum(seg, fs, profile.band_hz, ws)
+        peaks, td = window_peaks(seg, fs, profile)
+        sp = 60.0 * f_pk
+        quality = quality_from_snr(snr) * agreement_factor(sp, td)
+        bpm = np.arange(0.0, 100.01, 0.25)
+        amp = np.interp(bpm, f * 60.0, 2.0 * np.sqrt(power) / np.hanning(seg.size).sum())
+        ok = quality >= 0.5
+        return {"t0": round(float(tt[0]), 2), "t1": round(float(tt[-1]), 2), "window_s": ws,
+                "signal_t": _list(tt, 3), "signal": _list(seg, 3),
+                "peaks_t": _list(tt[peaks], 2), "peaks_v": _list(seg[peaks], 3),
+                "bpm": bpm.tolist(), "amp": _list(amp, 4), "band_bpm": [profile.band_hz[0] * 60, profile.band_hz[1] * 60],
+                "peak_bpm": round(sp, 2), "snr_db": round(float(10 * np.log10(max(snr, 1e-12))), 1),
+                "snr_halfwidth_bpm": round(max(0.03, 2.0 / ws) * 60, 2),
+                "spectral_bpm": _num(sp), "time_bpm": _num(td), "quality": round(float(quality), 3),
+                "shown_spectral": _num(sp) if ok else None, "shown_time": _num(td) if ok else None,
+                "resolution_bpm": round(60.0 / ws, 2)}
+
     # ------------------------------------------------------------------ build
     def _build(self, run_id: str, p: ScenarioParams) -> Run:
         cfg = to_synthetic(p)
@@ -112,6 +155,16 @@ class Service:
         for ts, _ in cfg.rate_steps:
             ok &= ~((est.t_end > ts) & (est.t_end - est.window_s < ts))
         sub = slice(None, None, 4)
+        # extra stage data for the Pipeline view: reference ROI, the FFC-repaired signal (before background
+        # subtraction), and which frames were frozen. Recomputed with the same functions the pipeline uses.
+        pc = PipelineConfig(profile=profile, fs_nominal=cfg.fs_nominal)
+        nos, ref = ROI.from_box(tr.nostril_box), ROI.from_box(tr.reference_box)
+        det = detect_ffc(full, pc.frozen_tol_c, pc.step_min_c, pc.step_k)
+        s_n, s_r = reduce_roi(full, nos, pc.reduction), reduce_roi(full, ref, "mean")
+        rep_n, rep_r = (_fill(ft, repair_invalid(ft, x, det.frozen_mask, pc.max_gap_s)) for x in (s_n, s_r))
+        _, ref_u = resample_uniform(ft, s_r, cfg.fs_nominal)
+        _, rep_n_u = resample_uniform(ft, rep_n, cfg.fs_nominal)
+        _, rep_r_u = resample_uniform(ft, rep_r, cfg.fs_nominal)
         return {
             "run_id": run_id,
             "source": {"kind": "simulation", "label": "SIMULATED DATA"},
@@ -130,8 +183,10 @@ class Service:
                      "reference": list(tr.reference_box)},
             "grid_t": _list(sig.t, 3),
             "stages": {
-                "raw": {"nostril": _list(sig.s_raw), "control": _list(sig.ctrl_raw)},
+                "raw": {"nostril": _list(sig.s_raw), "control": _list(sig.ctrl_raw), "reference": _list(ref_u)},
+                "repaired": {"nostril": _list(rep_n_u), "reference": _list(rep_r_u)},
                 "ffc": {"step_times": _list(sig.ffc_step_times, 2),  # detected by the pipeline
+                        "step_sizes": _list(det.step_sizes, 3), "frozen_times": _list(ft[det.frozen_mask], 2),
                         "repaired": _intervals(sig.ffc_mask, sig.t)},  # samples it repaired
                 "clean": _list(sig.s_clean),
                 "filtered": {"nostril": _list(sig.s_filt), "control": _list(sig.ctrl_filt)},
@@ -160,6 +215,22 @@ class Service:
                 "ffc_injected": int(tr.ffc_step_indices.size), "ffc_detected": int(sig.ffc_step_times.size),
             },
         }
+
+
+def _fill(t: np.ndarray, x: np.ndarray) -> np.ndarray:
+    """Linear-fill any NaN left by a too-long gap (same last-resort fill the pipeline uses)."""
+    bad = np.isnan(x)
+    if bad.any() and not bad.all():
+        x = x.copy(); x[bad] = np.interp(t[bad], t[~bad], x[~bad])
+    return x
+
+
+def _amp_spectrum(x: np.ndarray, fs: float, bpm: np.ndarray) -> np.ndarray:
+    """Amplitude (degC) of the sinusoid at each rate in ``bpm``: Hann window, zero padded, mean removed."""
+    w = np.hanning(x.size)
+    nfft = int(2 ** np.ceil(np.log2(x.size * 8)))
+    amp = 2.0 * np.abs(np.fft.rfft((x - x.mean()) * w, nfft)) / w.sum()
+    return np.interp(bpm, np.fft.rfftfreq(nfft, 1.0 / fs) * 60.0, amp)
 
 
 def _num(x: float) -> float | None:

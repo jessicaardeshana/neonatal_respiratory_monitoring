@@ -5,6 +5,8 @@ Endpoints (all demo data is SIMULATED):
     GET  /api/schema          slider definitions + default parameters
     POST /api/run             run a scenario through the real pipeline -> all stage data
     GET  /api/frames          thermal frames as raw int16 (centi-degC), in chunks
+    GET  /api/spectrum        amplitude spectrum before/after band-pass over a time range
+    GET  /api/window          what the rate estimator sees for the window ending at t_end
     GET  /api/results         report tables and the honest-limits list
 """
 
@@ -55,6 +57,28 @@ def create_app(service: Service | None = None) -> FastAPI:
                         headers={"X-Frame-Count": str(chunk.shape[0]), "X-Frame-Rows": str(FRAME_ROWS),
                                  "X-Frame-Cols": str(FRAME_COLS), "X-Frame-Scale": "0.01",
                                  "Cache-Control": "no-store"})
+
+    def _need(run_id: str):
+        r = svc.get(run_id)
+        if r is None:
+            raise HTTPException(404, "Unknown or expired run. Run the scenario again.")
+        return r
+
+    @app.get("/api/spectrum")
+    def spectrum(run: str, t0: float = Query(..., ge=0), t1: float = Query(..., ge=0)) -> dict:
+        r = _need(run)
+        try:
+            return svc.spectrum(r, t0, t1)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
+
+    @app.get("/api/window")
+    def window(run: str, t_end: float = Query(..., ge=0)) -> dict:
+        r = _need(run)
+        try:
+            return svc.window(r, t_end)
+        except ValueError as e:
+            raise HTTPException(400, str(e)) from None
 
     @app.get("/api/results")
     def results() -> dict:

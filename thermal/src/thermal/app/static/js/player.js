@@ -2,6 +2,8 @@
 import { bisect, clamp } from "./util.js";
 
 const CHUNK = 64, ROWS = 60, COLS = 80;
+// Frames are cached per run and shared by every player instance (Monitor and Pipeline views).
+const STORE = new Map(), PENDING = new Set();
 
 // Inferno-style palette, 256 steps, built from anchor colors.
 const STOPS = [[0, 0, 4], [27, 12, 66], [74, 12, 107], [120, 28, 109], [165, 44, 96], [207, 68, 70], [237, 105, 37], [251, 155, 6], [247, 208, 60], [252, 255, 164]];
@@ -20,24 +22,28 @@ export class ThermalPlayer {
     this.canvas = canvas; this.ctx = canvas.getContext("2d");
     this.off = document.createElement("canvas"); this.off.width = COLS; this.off.height = ROWS;
     this.offCtx = this.off.getContext("2d"); this.img = this.offCtx.createImageData(COLS, ROWS);
-    this.chunks = new Map(); this.pending = new Set(); this.onFrameReady = onFrameReady;
+    this.chunks = new Map(); this.onFrameReady = onFrameReady;
     this.mode = "face"; this.showRois = true; this.last = null;
     this.zoom = true; this.crop = { r0: 22, r1: 50, c0: 26, c1: 54 };  // nose + cheek area
   }
-  setRun(run) { this.run = run; this.chunks.clear(); this.pending.clear(); this.last = null; this.ft = run.frame_times; }
+  setRun(run) {
+    this.run = run; this.last = null; this.ft = run.frame_times;
+    if (!STORE.has(run.run_id)) { STORE.set(run.run_id, new Map()); while (STORE.size > 3) STORE.delete(STORE.keys().next().value); }
+    this.chunks = STORE.get(run.run_id);
+  }
   frameIndexAt(t) { return clamp(bisect(this.ft, t), 0, this.ft.length - 1); }
   range() { return this.run.meta.temp_range[this.mode]; }
 
   async _load(c) {
-    if (this.chunks.has(c) || this.pending.has(c) || c * CHUNK >= this.ft.length) return;
-    this.pending.add(c);
-    const runId = this.run.run_id;
+    const runId = this.run.run_id, key = `${runId}:${c}`;
+    if (this.chunks.has(c) || PENDING.has(key) || c * CHUNK >= this.ft.length) return;
+    PENDING.add(key);
     try {
       const res = await fetch(`/api/frames?run=${runId}&start=${c * CHUNK}&count=${CHUNK}`);
       if (!res.ok) throw new Error(`frames ${res.status}`);
       const arr = new Int16Array(await res.arrayBuffer());
-      if (this.run.run_id === runId) { this.chunks.set(c, arr); this.onFrameReady?.(); }
-    } catch (e) { console.warn(e); } finally { this.pending.delete(c); }
+      STORE.get(runId)?.set(c, arr); this.onFrameReady?.();
+    } catch (e) { console.warn(e); } finally { PENDING.delete(key); }
   }
 
   /** Raw frame (Int16Array of centi-degC) or null if its chunk has not arrived yet. */

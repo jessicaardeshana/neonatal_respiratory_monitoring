@@ -191,3 +191,67 @@ def test_ui_never_hides_that_data_is_simulated():
     static = Path(__import__("thermal.app.server", fromlist=["STATIC"]).STATIC)
     js = (static / "js" / "monitor.js").read_text() + (static / "js" / "main.js").read_text()
     assert "SIMULATED" in js.upper() and "source.label" in js
+
+
+# ---- Pipeline view data -----------------------------------------------------------------
+def test_payload_carries_every_stage_the_pipeline_view_draws(story):
+    st = story["stages"]
+    n = len(story["grid_t"])
+    assert len(st["raw"]["reference"]) == len(st["repaired"]["nostril"]) == len(st["repaired"]["reference"]) == n
+    assert len(st["ffc"]["step_sizes"]) == len(st["ffc"]["step_times"]) == 2
+    assert 1 <= len(st["ffc"]["frozen_times"]) <= 4
+    assert all(0.1 <= abs(x) <= 0.3 for x in st["ffc"]["step_sizes"])  # the modeled FFC step size range
+    # background has no breathing: it should be far quieter than the nose
+    ref = np.array(st["raw"]["reference"], dtype=float)
+    nos = np.array(st["raw"]["nostril"], dtype=float)
+    assert np.ptp(ref[100:400]) < 0.2 * np.ptp(nos[100:400])
+
+
+def test_repair_keeps_the_ffc_step_but_background_subtraction_removes_it(story):
+    """Uses the LAST glitch (24 breaths/min): ~3 whole breaths on each side average the breathing wiggle away."""
+    st, t = story["stages"], np.array(story["grid_t"])
+    k = int(np.argmin(np.abs(t - st["ffc"]["step_times"][-1])))
+    before, after = slice(k - 70, k - 3), slice(k + 3, k + 70)
+    rep = np.array(st["repaired"]["nostril"], dtype=float)
+    clean = np.array(st["clean"], dtype=float)
+    jump_repaired = abs(rep[after].mean() - rep[before].mean())
+    jump_clean = abs(clean[after].mean() - clean[before].mean())
+    assert jump_repaired > 0.15   # frozen frames are repaired, but the level jump is still in the signal...
+    assert jump_clean < 0.05      # ...until the background patch (which sees the same jump) is subtracted
+
+
+def test_spectrum_peaks_at_the_true_rate_and_band_pass_removes_slow_drift(client, story):
+    sp = client.get("/api/spectrum", params={"run": story["run_id"], "t0": 20, "t1": 70}).json()
+    bpm = np.array(sp["bpm"])
+    clean = np.nan_to_num(np.array(sp["clean"], dtype=float))
+    filt = np.nan_to_num(np.array(sp["filtered"], dtype=float))
+    assert abs(bpm[filt.argmax()] - 14) <= 1.0 and abs(bpm[clean.argmax()] - 14) <= 1.0
+    lo, hi = sp["band_bpm"]
+    assert (lo, hi) == (6.0, 42.0)
+    outside = (bpm < lo * 0.6) | (bpm > hi * 1.4)  # far from the passband
+    assert filt[outside].max() < 0.5 * clean[outside].max() + 1e-9
+
+
+def test_window_endpoint_explains_the_estimate(client, story):
+    w = client.get("/api/window", params={"run": story["run_id"], "t_end": 60}).json()
+    assert w["window_s"] == 30 and abs(w["spectral_bpm"] - 14) < 1.0 and abs(w["time_bpm"] - 14) < 1.0
+    assert 5 <= len(w["peaks_t"]) <= 8 and w["quality"] >= 0.5 and w["shown_time"] is not None
+    assert w["resolution_bpm"] == 2.0 and len(w["signal_t"]) == len(w["signal"])
+    assert abs(w["peak_bpm"] - w["spectral_bpm"]) < 0.01
+    # matches what the pipeline itself reported for that window
+    rate = story["stages"]["rate"]
+    i = int(np.argmin(np.abs(np.array(rate["t_end"]) - w["t1"])))
+    assert abs(rate["spectral"][i] - w["spectral_bpm"]) < 0.5
+
+
+def test_window_during_a_pause_withholds_the_rate(client, story):
+    w = client.get("/api/window", params={"run": story["run_id"], "t_end": 124}).json()
+    assert w["quality"] < 0.5 and w["shown_spectral"] is None and w["shown_time"] is None
+
+
+def test_analysis_endpoints_reject_bad_requests(client, story):
+    rid = story["run_id"]
+    assert client.get("/api/window", params={"run": rid, "t_end": 10}).status_code == 400  # window not full yet
+    assert client.get("/api/spectrum", params={"run": rid, "t0": 0, "t1": 3}).status_code == 400
+    assert client.get("/api/window", params={"run": "nope", "t_end": 60}).status_code == 404
+    assert client.get("/api/spectrum", params={"run": "nope", "t0": 0, "t1": 60}).status_code == 404

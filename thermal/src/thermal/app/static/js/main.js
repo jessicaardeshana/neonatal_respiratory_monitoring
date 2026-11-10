@@ -1,10 +1,11 @@
 // App shell: tabs, playback clock, run loading.
 import { h, clamp } from "./util.js";
 import { buildMonitor } from "./monitor.js";
+import { buildPipeline } from "./pipeline.js";
 
 const TABS = [
   { id: "monitor", label: "Monitor", ready: true },
-  { id: "pipeline", label: "Pipeline", ready: false, blurb: "Click through all seven processing stages, from raw pixels to the apnea decision, with a plain-language explanation of each." },
+  { id: "pipeline", label: "Pipeline", ready: true },
   { id: "lab", label: "Lab", ready: false, blurb: "Sliders for breathing rate, pauses, incubator temperature, noise, head movement and camera glitches. Watch the result change." },
   { id: "results", label: "Results & limits", ready: false, blurb: "Accuracy numbers, the incubator study, and an honest list of what is not met or not tested yet." },
   { id: "device", label: "Device", ready: false, blurb: "Detect a thermal camera when one is plugged in and show the live feed through the same pipeline." },
@@ -38,7 +39,9 @@ async function boot() {
   document.querySelector("#source-badge span").textContent = state.run.source.label;
 
   const monitor = buildMonitor(state);
+  const controllers = { monitor };
   views.monitor = h("section", { class: "view", id: "view-monitor" }, monitor.el);
+  views.pipeline = h("section", { class: "view", id: "view-pipeline", hidden: true });
   for (const t of TABS.filter(t => !t.ready)) {
     views[t.id] = h("section", { class: "view", id: `view-${t.id}`, hidden: true },
       h("div", { class: "card placeholder" }, h("div", {}, h("h2", {}, t.label), h("p", {}, t.blurb), h("p", { style: "margin-top:14px;color:var(--faint)" }, "Coming in the next build steps."))));
@@ -52,17 +55,20 @@ async function boot() {
   function select(id) {
     state.tab = id;
     TABS.forEach((t, i) => { buttons[i].setAttribute("aria-selected", String(t.id === id)); views[t.id].hidden = t.id !== id; });
+    if (id === "pipeline" && !controllers.pipeline) {  // built on first visit so it does not move the Monitor's playhead
+      controllers.pipeline = buildPipeline(state); views.pipeline.append(controllers.pipeline.el); controllers.pipeline.setRun(state.run);
+    } else controllers[id]?.enter?.();
     state.dirty = true;
   }
 
   addEventListener("keydown", e => {
-    if (e.target.closest("input, select, textarea") || state.tab !== "monitor") return;
+    if (e.target.closest("input, select, textarea") || !controllers[state.tab]) return;
     if (e.code === "Space") { e.preventDefault(); state.toggle(); }
     else if (e.code === "ArrowRight") state.seek(state.t + (state.playing ? 5 : 1 / state.run.meta.fs));
     else if (e.code === "ArrowLeft") state.seek(state.t - (state.playing ? 5 : 1 / state.run.meta.fs));
-    else if (e.key === "s" || e.key === "S") monitor.toggleScale();
+    else if ((e.key === "s" || e.key === "S") && state.tab === "monitor") monitor.toggleScale();
   });
-  addEventListener("resize", () => { monitor.relayout(); state.redraw(); });
+  addEventListener("resize", () => { Object.values(controllers).forEach(c => c.relayout?.()); state.redraw(); });
 
   let last = performance.now();
   (function loop(now) {
@@ -72,9 +78,9 @@ async function boot() {
       if (state.t >= state.run.meta.duration_s) { state.t = state.run.meta.duration_s; state.playing = false; }
       state.dirty = true;
     }
-    if (state.dirty && state.tab === "monitor") { state.dirty = false; monitor.update(state.t); }
+    if (state.dirty && controllers[state.tab]) { state.dirty = false; controllers[state.tab].update(state.t); }
     requestAnimationFrame(loop);
   })(last);
-  window.__app = state;  // handy for debugging in the browser console
+  window.__app = state; window.__select = select; window.__ctl = controllers;  // handy for debugging in the browser console
 }
 boot();
