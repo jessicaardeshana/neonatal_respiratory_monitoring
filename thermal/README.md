@@ -25,6 +25,16 @@ About 10 seconds. Produces, all labeled synthetic:
 python -m pytest                 # all tests
 ```
 
+## Interactive demo app (for recording and for the team)
+
+```bash
+pip install -e ".[dev,app]"
+python scripts/run_app.py          # opens http://127.0.0.1:8765
+```
+
+A dark clinical monitor UI running the real pipeline on simulated data (always badged SIMULATED).
+Plan and build status: `DEMO_APP_SPEC.md`. It never opens a camera unless you click Connect on the Device screen.
+
 Other scripts: `scripts/sweep_ambient.py` (incubator temperature study), `scripts/phase3_report.py`,
 `scripts/phase4_report.py` (accuracy studies). Raw recordings of real people go in `data/` only
 (gitignored, never commit them).
