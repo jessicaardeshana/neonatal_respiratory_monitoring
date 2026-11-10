@@ -32,6 +32,7 @@ class RateEstimate:
     quality: np.ndarray  # (K,) in [0, 1]
     f_peak_hz: np.ndarray  # (K,) spectral peak frequency (not gated)
     window_s: float
+    snr_db: np.ndarray | None = None  # (K,) spectral SNR in dB (not gated)
 
 
 def _spectral_window(seg: np.ndarray, fs: float, band_hz: tuple[float, float],
@@ -72,13 +73,15 @@ def estimate_rates(t: np.ndarray, x: np.ndarray, fs: float, profile: Profile,
     n_win, hop = int(round(window_s * fs)), max(1, int(round(hop_s * fs)))
     starts = np.arange(0, x.size - n_win + 1, hop)
     k = starts.size
-    out = {name: np.full(k, np.nan) for name in ("sp", "td", "q", "f")}
+    out = {name: np.full(k, np.nan) for name in ("sp", "td", "q", "f", "snr")}
     for i, s0 in enumerate(starts):
         seg = x[s0 : s0 + n_win]
         f_pk, snr = _spectral_window(seg, fs, profile.band_hz, window_s)
         sp, td = 60.0 * f_pk, _time_window(seg, fs, profile)
         q = quality_from_snr(snr) * agreement_factor(sp, td)
         out["q"][i], out["f"][i] = q, f_pk
+        out["snr"][i] = 10.0 * np.log10(max(snr, 1e-12))
         if q >= min_quality:
             out["sp"][i], out["td"][i] = sp, td
-    return RateEstimate(t[starts + n_win - 1], out["sp"], out["td"], out["q"], out["f"], window_s)
+    return RateEstimate(t[starts + n_win - 1], out["sp"], out["td"], out["q"], out["f"], window_s,
+                        out["snr"])
