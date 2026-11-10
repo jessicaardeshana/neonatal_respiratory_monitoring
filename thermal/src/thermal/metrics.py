@@ -51,3 +51,38 @@ def step_lag(t_end: np.ndarray, est: np.ndarray, t_step: float, new_bpm: float,
         if i + hold <= ok.size and ok[i : i + hold].all():
             return float(t_end[i] - t_step)
     return float("nan")
+
+
+def score_events(true_windows: list[tuple[float, float]], detected: list[tuple[float, float]]) -> dict:
+    """Compare detected (start, end) events with true (start, end) windows, in seconds.
+
+    Each true window is matched to the detected event that overlaps it most.
+    Errors are detected minus true (positive start error = detected late,
+    positive end error = detected late). ``false_alarms`` are detections that
+    overlap no true window; ``fragments`` are extra detections splitting one
+    true window.
+    """
+    start_err, end_err, used = [], [], set()
+    missed = 0
+    for ts, te in true_windows:
+        best, best_ov = None, 0.0
+        for j, (ds, de) in enumerate(detected):
+            ov = min(te, de) - max(ts, ds)
+            if ov > best_ov:
+                best, best_ov = j, ov
+        if best is None:
+            missed += 1
+            continue
+        used.add(best)
+        start_err.append(detected[best][0] - ts)
+        end_err.append(detected[best][1] - te)
+    false_alarms = fragments = 0
+    for j, (ds, de) in enumerate(detected):
+        if j in used:
+            continue
+        if any(min(te, de) - max(ts, ds) > 0 for ts, te in true_windows):
+            fragments += 1
+        else:
+            false_alarms += 1
+    return {"start_err": start_err, "end_err": end_err, "missed": missed,
+            "false_alarms": false_alarms, "fragments": fragments}
