@@ -85,3 +85,13 @@ def estimate_rates(t: np.ndarray, x: np.ndarray, fs: float, profile: Profile,
             out["sp"][i], out["td"][i] = sp, td
     return RateEstimate(t[starts + n_win - 1], out["sp"], out["td"], out["q"], out["f"], window_s,
                         out["snr"])
+
+
+def hold_to_grid(t: np.ndarray, t_end: np.ndarray, values: np.ndarray) -> np.ndarray:
+    """Per-sample, causal version of window-level values.
+
+    Each sample time gets the value of the latest window that had already
+    finished (``t_end <= t``); NaN before the first window completes.
+    """
+    idx = np.searchsorted(t_end, t, side="right") - 1
+    return np.where(idx >= 0, values[np.clip(idx, 0, None)], np.nan)

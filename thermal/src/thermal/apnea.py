@@ -35,7 +35,7 @@ import numpy as np
 from scipy.signal import hilbert
 
 from thermal.config import Profile
-from thermal.rate import RateEstimate, estimate_rates
+from thermal.rate import RateEstimate, estimate_rates, hold_to_grid
 
 
 @dataclass
@@ -132,8 +132,7 @@ def running_baseline(env: np.ndarray, fs: float, k: float, baseline_s: float,
 
 def quality_on_grid(t: np.ndarray, est: RateEstimate) -> np.ndarray:
     """Hold the latest completed estimator window's quality (NaN before the first)."""
-    idx = np.searchsorted(est.t_end, t, side="right") - 1
-    return np.where(idx >= 0, est.quality[np.clip(idx, 0, None)], np.nan)
+    return hold_to_grid(t, est.t_end, est.quality)
 
 
 def _runs(mask: np.ndarray) -> list[tuple[int, int]]:

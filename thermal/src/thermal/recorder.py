@@ -48,7 +48,8 @@ def _json_default(o):
     raise TypeError(f"not JSON serializable: {type(o)}")
 
 
-def _git_commit() -> str:
+def git_commit() -> str:
+    """Short git hash of the code that made a file (\"unknown\" if unavailable)."""
     try:
         out = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=Path(__file__).parent,
                              capture_output=True, text=True, timeout=5)
@@ -115,7 +116,7 @@ def record(source: FrameSource, path: str | Path, max_frames: int | None = None,
         "frame_shape": list(FRAME_SHAPE),
         "n_frames": len(ts),
         "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "git_commit": _git_commit(),
+        "git_commit": git_commit(),
     }
     truth = None
     tr = getattr(source, "truth", None)
