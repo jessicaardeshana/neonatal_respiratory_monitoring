@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.16)
+project(nicu_depth LANGUAGES CXX)
+set(KINECT_ROOT "$ENV{HOME}/libfreenect2-metal" CACHE PATH "Existing Kinect source/build directory")
+# The fork's build-tree Config.cmake assumes an installed layout. Link the
+# existing dylib directly, using source headers AND generated build headers.
+find_library(FREENECT2_LIBRARY freenect2 PATHS "${KINECT_ROOT}/build/lib" NO_DEFAULT_PATH REQUIRED)
+find_package(glfw3 REQUIRED)
+find_package(OpenGL REQUIRED)
+add_executable(depth_capture src/depth_capture.cpp)
+target_compile_features(depth_capture PRIVATE cxx_std_17)
+target_include_directories(depth_capture PRIVATE "${KINECT_ROOT}/include" "${KINECT_ROOT}/build")
+target_link_libraries(depth_capture PRIVATE "${FREENECT2_LIBRARY}" glfw OpenGL::GL)
+set_target_properties(depth_capture PROPERTIES BUILD_RPATH "${KINECT_ROOT}/build/lib")
+# Some Command Line Tools installations omit the SDK libc++ include path.
+if(APPLE)
+  execute_process(COMMAND xcrun --show-sdk-path OUTPUT_VARIABLE APPLE_SDK OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(EXISTS "${APPLE_SDK}/usr/include/c++/v1/cstddef")
+    target_compile_options(depth_capture PRIVATE "-isystem${APPLE_SDK}/usr/include/c++/v1")
+  endif()
+endif()

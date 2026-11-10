@@ -1,0 +1,4 @@
+frame,device_ticks,device_elapsed_s,arrival_timestamp_us,host_received_elapsed_s,sequence,status,valid_pixels
+0,4294967200,0,1000000,0,1,0,217084
+1,170,0.03325,1033250,0.034,2,0,217088
+2,436,0.0665,1066500,0.067,3,0,217088
