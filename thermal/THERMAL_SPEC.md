@@ -17,6 +17,7 @@
 - **Decisions:** each nuisance has its own random stream (toggling one does not change another; fixed seed is reproducible). Default amplitude gain 0.07 degC per degC gives A = 0.74 degC at 24 degC ambient, about 0.04 at 34 degC and 0 at 36 degC (the incubator effect). Ground truth also includes a control ROI (cheek) and reference ROI (background corner) for Phase 2. FFC freezes repeat the previous frame, and the offset step persists until the end of the recording.
 - **Known quirk:** head jitter shifts the face by 1 px, and because the cheek control ROI sits on a temperature gradient, its mean shows small steps (about 0.1-0.4 degC). This is a motion artifact the pipeline must tolerate, not a breathing peak. Jitter rate is configurable (`head_jitter_prob`, default 0.01 per frame).
 - **Open issues:** all numbers are simulated from unverified datasheet recall. The face gradient and jitter size are modeling guesses, not measurements.
+- **Added after review:** `figures/synthetic_five_seconds.png` (made by `scripts/plot_five_seconds.py`) shows 10 frames over 5 s with a zoomed color scale: the nostril patch is darker than its surroundings on inhale and brighter on exhale. The first overview figure uses the full 24-34 degC scale, so a ~1 degC breath swing is nearly invisible there. Look at this one first to understand the signal.
 - **Next step:** Phase 2 (Sections 6.3-6.5): FFC detection/repair, ROI reduction, resample/detrend/band-pass. Stop for review after it.
 
 ### 2026-11-10 · branch `thermalexploration` · Phase 0 scaffold
