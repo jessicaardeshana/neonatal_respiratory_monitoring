@@ -22,6 +22,7 @@ export class ThermalPlayer {
     this.offCtx = this.off.getContext("2d"); this.img = this.offCtx.createImageData(COLS, ROWS);
     this.chunks = new Map(); this.pending = new Set(); this.onFrameReady = onFrameReady;
     this.mode = "face"; this.showRois = true; this.last = null;
+    this.zoom = true; this.crop = { r0: 22, r1: 50, c0: 26, c1: 54 };  // nose + cheek area
   }
   setRun(run) { this.run = run; this.chunks.clear(); this.pending.clear(); this.last = null; this.ft = run.frame_times; }
   frameIndexAt(t) { return clamp(bisect(this.ft, t), 0, this.ft.length - 1); }
@@ -67,28 +68,32 @@ export class ThermalPlayer {
     }
     this.offCtx.putImageData(this.img, 0, 0);
     this.ctx.imageSmoothingEnabled = true; this.ctx.imageSmoothingQuality = "high";
-    this.ctx.drawImage(this.off, 0, 0, w, h);
-    if (this.showRois) this._rois(w, h);
+    const k = this._view();
+    this.ctx.drawImage(this.off, k.c0, k.r0, k.c1 - k.c0, k.r1 - k.r0, 0, 0, w, h);
+    if (this.showRois) this._rois(w, h, k);
     const rois = this.run.rois;
     return { nostril: this.roiMean(f, rois.nostril), control: this.roiMean(f, rois.control), ready: !!this.chunks.get(Math.floor(i / CHUNK)) };
   }
+  _view() { return this.zoom ? this.crop : { r0: 0, r1: ROWS, c0: 0, c1: COLS }; }
   _size() {
     const dpr = Math.max(1, window.devicePixelRatio || 1), cw = this.canvas.clientWidth, ch = this.canvas.clientHeight;
     if (this.canvas.width !== Math.round(cw * dpr)) { this.canvas.width = Math.round(cw * dpr); this.canvas.height = Math.round(ch * dpr); }
     this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     return { w: cw, h: ch };
   }
-  _rois(w, h) {
-    const sx = w / COLS, sy = h / ROWS, ctx = this.ctx;
-    const items = [["nostril", "#38d9c8", "NOSTRIL", []], ["control", "#3ddc97", "CHEEK (CONTROL)", []], ["reference", "#e8eef6", "BACKGROUND", [5, 4]]];
-    ctx.font = "600 11px ui-sans-serif, -apple-system, sans-serif"; ctx.textBaseline = "bottom";
-    for (const [k, col, label, dash] of items) {
-      const [r0, r1, c0, c1] = this.run.rois[k];
-      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.setLineDash(dash);
-      ctx.strokeRect(c0 * sx, r0 * sy, (c1 - c0) * sx, (r1 - r0) * sy); ctx.setLineDash([]);
-      const tw = ctx.measureText(label).width + 10, lx = c0 * sx, ly = r0 * sy - 3;
-      ctx.fillStyle = "rgba(8,13,20,.78)"; ctx.fillRect(lx, ly - 15, tw, 16);
-      ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(label, lx + 5, ly);
+  _rois(w, h, k) {
+    const sx = w / (k.c1 - k.c0), sy = h / (k.r1 - k.r0), ctx = this.ctx;
+    const items = [["nostril", "#9be0d3", "NOSE", []], ["control", "#a9dcb9", "CHEEK", []], ["reference", "#e4e8ed", "BACKGROUND", [5, 4]]];
+    ctx.font = "600 10px ui-sans-serif, -apple-system, sans-serif"; ctx.textBaseline = "bottom";
+    for (const [key, col, label, dash] of items) {
+      const [r0, r1, c0, c1] = this.run.rois[key];
+      if (r1 <= k.r0 || r0 >= k.r1 || c1 <= k.c0 || c0 >= k.c1) continue;  // outside the zoomed view
+      const x = (c0 - k.c0) * sx, y = (r0 - k.r0) * sy;
+      ctx.strokeStyle = col; ctx.lineWidth = 1.5; ctx.setLineDash(dash);
+      ctx.strokeRect(x, y, (c1 - c0) * sx, (r1 - r0) * sy); ctx.setLineDash([]);
+      const tw = ctx.measureText(label).width + 8;
+      ctx.fillStyle = "rgba(14,17,22,.8)"; ctx.fillRect(x, y - 14, tw, 13);
+      ctx.fillStyle = col; ctx.textAlign = "left"; ctx.fillText(label, x + 4, y - 3);
     }
   }
 }

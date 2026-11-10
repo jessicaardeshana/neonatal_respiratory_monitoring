@@ -2,8 +2,8 @@
 import { bisect } from "./util.js";
 
 const FONT = '12px ui-sans-serif, -apple-system, "Segoe UI", Inter, sans-serif';
-export const COLORS = { grid: "#1d2b3d", axis: "#5f7087", text: "#8a9bb0", accent: "#38d9c8", alarm: "#ff4d5e",
-  warn: "#ffb547", blue: "#5aa9ff", good: "#3ddc97", white: "#e8eef6" };
+export const COLORS = { grid: "#222a35", zero: "#303a47", axis: "#667180", text: "#8e99a6", accent: "#6bb7aa", alarm: "#d65a5a",
+  warn: "#d6a24a", blue: "#6f9fd4", good: "#6dbb8d", white: "#e4e8ed" };
 
 /** Size a canvas to its CSS box at device pixel ratio; returns a context drawing in CSS pixels. */
 export function fitCanvas(canvas) {
@@ -35,7 +35,7 @@ export function ticks(lo, hi, n = 5) {
  */
 export function drawChart(canvas, o) {
   const { ctx, w, h } = fitCanvas(canvas);
-  const m = { l: 46, r: 14, t: 12, b: 26, ...(o.margin || {}) };
+  const m = { l: 46, r: 14, t: 12, b: o.noXLabels ? 6 : 24, ...(o.margin || {}) };
   const pw = w - m.l - m.r, ph = h - m.t - m.b;
   const X = v => m.l + (v - o.x[0]) / (o.x[1] - o.x[0]) * pw;
   const Y = v => m.t + (1 - (v - o.y[0]) / (o.y[1] - o.y[0])) * ph;
@@ -46,7 +46,7 @@ export function drawChart(canvas, o) {
   ctx.lineWidth = 1;
   for (const v of ticks(o.y[0], o.y[1], o.yTicks || 4)) {
     const y = Math.round(Y(v)) + 0.5;
-    ctx.strokeStyle = v === 0 ? "#2b3d55" : COLORS.grid; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(w - m.r, y); ctx.stroke();
+    ctx.strokeStyle = v === 0 ? COLORS.zero : COLORS.grid; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(w - m.r, y); ctx.stroke();
     ctx.fillStyle = COLORS.text; ctx.textAlign = "right"; ctx.fillText(o.yFmt ? o.yFmt(v) : v.toFixed(1), m.l - 8, y);
   }
   // x labels
@@ -54,7 +54,7 @@ export function drawChart(canvas, o) {
   for (const v of ticks(o.x[0], o.x[1], o.xTicks || 6)) {
     const x = Math.round(X(v)) + 0.5;
     ctx.strokeStyle = COLORS.grid; ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, m.t + ph); ctx.stroke();
-    ctx.fillStyle = COLORS.text; ctx.fillText(o.xFmt ? o.xFmt(v) : String(v), x, h - m.b + 7);
+    if (!o.noXLabels) { ctx.fillStyle = COLORS.text; ctx.fillText(o.xFmt ? o.xFmt(v) : String(v), x, h - m.b + 6); }
   }
   ctx.save(); ctx.beginPath(); ctx.rect(m.l, m.t, pw, ph); ctx.clip();
 
@@ -80,7 +80,8 @@ export function drawChart(canvas, o) {
       if (!pen) { ctx.moveTo(x, y); pen = true; first = first ?? x; } else ctx.lineTo(x, y);
       last = x;
     }
-    ctx.lineJoin = "round"; ctx.lineWidth = s.width || 2; ctx.strokeStyle = s.color; ctx.stroke();
+    ctx.lineJoin = "round"; ctx.lineWidth = s.width || 2; ctx.strokeStyle = s.color; ctx.setLineDash(s.dash || []); ctx.stroke(); ctx.setLineDash([]);
+    if (s.dots) { ctx.fillStyle = s.color; for (let i = i0; i <= stop; i++) if (s.ys[i] != null) { ctx.beginPath(); ctx.arc(X(s.xs[i]), Y(s.ys[i]), s.dots, 0, 6.2832); ctx.fill(); } }
     if (s.fill && first != null) {
       ctx.lineTo(last, Y(Math.max(o.y[0], 0))); ctx.lineTo(first, Y(Math.max(o.y[0], 0))); ctx.closePath();
       ctx.fillStyle = s.fill; ctx.fill();

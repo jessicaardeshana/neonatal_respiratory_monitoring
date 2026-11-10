@@ -62,7 +62,7 @@ async function boot() {
     else if (e.code === "ArrowLeft") state.seek(state.t - (state.playing ? 5 : 1 / state.run.meta.fs));
     else if (e.key === "s" || e.key === "S") monitor.toggleScale();
   });
-  addEventListener("resize", () => state.redraw());
+  addEventListener("resize", () => { monitor.relayout(); state.redraw(); });
 
   let last = performance.now();
   (function loop(now) {
