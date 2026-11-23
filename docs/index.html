@@ -13,7 +13,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=202611231814">
 </head>
 <body>
   <div class="aurora" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -99,8 +99,8 @@
             <ellipse cx="258" cy="228" rx="14" ry="3"/>
           </g>
           <!-- alert pill: shown while the monitor reports a pause / apnea -->
-          <g class="scene-pill pill-pause"><rect x="205" y="176" width="110" height="26" rx="13"/><text x="260" y="193.5" text-anchor="middle">Pause</text></g>
-          <g class="scene-pill pill-apnea"><rect x="190" y="176" width="140" height="26" rx="13"/><text x="260" y="193.5" text-anchor="middle">Apnea detected</text></g>
+          <g class="scene-pill pill-pause" opacity="0"><rect x="205" y="176" width="110" height="26" rx="13" fill="#0a0c2a"/><text x="260" y="193.5" text-anchor="middle">Pause</text></g>
+          <g class="scene-pill pill-apnea" opacity="0"><rect x="190" y="176" width="140" height="26" rx="13" fill="#0a0c2a"/><text x="260" y="193.5" text-anchor="middle">Apnea detected</text></g>
           <!-- labels -->
           <g class="tag"><rect x="40" y="120" width="104" height="28" rx="14"/><circle cx="58" cy="134" r="4" class="tag-dot"/><text x="70" y="138">No wires</text></g>
           <g class="tag"><rect x="326" y="150" width="134" height="28" rx="14"/><circle cx="344" cy="164" r="4" class="tag-dot"/><text x="356" y="168">No adhesives</text></g>
@@ -124,11 +124,7 @@
       <h2 class="story-line reveal">While shadowing in a NICU, we met a baby weighing just</h2>
       <p class="big-number reveal" aria-label="500 grams"><span id="grams" data-to="500">0</span><small>grams</small></p>
       <div class="compare-weight reveal">
-        <p>On average, a healthy baby weighs about <strong>3,500 grams</strong> at birth, <strong>7× more</strong>.</p>
-        <div class="weight-bars" aria-hidden="true">
-          <span class="wb wb-small"><i></i><b class="mono">500 g</b></span>
-          <span class="wb wb-full"><i></i><b class="mono">3,500 g</b></span>
-        </div>
+        <p>On average, a healthy baby weighs about <strong class="red">3,500 grams</strong> at birth, <strong>7× more</strong>.</p>
       </div>
 
       <ol class="journey">
@@ -250,7 +246,7 @@
     </div>
   </footer>
 
-  <script src="assets/data/trace.js"></script>
-  <script src="main.js"></script>
+  <script src="assets/data/trace.js?v=202611231814"></script>
+  <script src="main.js?v=202611231814"></script>
 </body>
 </html>

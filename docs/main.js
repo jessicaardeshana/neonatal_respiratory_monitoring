@@ -71,6 +71,7 @@
     const scene = document.querySelector(".scene");
     const chest = document.querySelector(".scene .chest");
     const contour = document.querySelector(".scene .contour");
+    let chestV = 0.5;
     // Fast-forward (4x, labelled) through the long stretch without breathing.
     const FAST = 4;
     const speedAt = (tt) => {
@@ -158,7 +159,12 @@
 
       // Illustration: the baby's chest and depth contours move with the same signal.
       if (chest) {
-        const v = Math.max(0, Math.min(1, (sample(t) + 1.2) / 2.4));
+        // No breath detected -> chest held still (ignore slow drift in the recording).
+        const s = ((t % total) + total) % total;
+        const still = apnea.some(([a, b]) => s >= a && s <= b);
+        const target = still ? 0.5 : Math.max(0, Math.min(1, (sample(t) + 1.2) / 2.4));
+        chestV += (target - chestV) * (once ? 1 : 0.5);
+        const v = chestV;
         chest.style.transform = `scaleY(${(0.9 + 0.4 * v).toFixed(3)})`;
         contour.style.transform = `translateY(${(-4 * v).toFixed(2)}px) scale(${(0.96 + 0.1 * v).toFixed(3)})`;
       }

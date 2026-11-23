@@ -278,7 +278,7 @@ canvas { display: block; width: 100%; }
 .scene-pill text { font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .pill-pause rect { stroke: var(--amber); } .pill-pause text { fill: var(--amber); }
 .pill-apnea rect { stroke: var(--red); } .pill-apnea text { fill: var(--red); }
-.scene[data-state="pause"] .pill-pause, .scene[data-state="apnea"] .pill-apnea { opacity: 1; }
+.scene[data-state="pause"] .pill-pause, .scene[data-state="apnea"] .pill-apnea { opacity: 1 !important; }
 .scene[data-state="pause"] .field { fill: url(#beamPause); }
 .scene[data-state="apnea"] .field { fill: url(#beamAlert); }
 .scene[data-state="pause"] .contour ellipse, .scene[data-state="pause"] .scanline { stroke: var(--amber); }
@@ -290,9 +290,4 @@ canvas { display: block; width: 100%; }
 /* 500 g vs a healthy birth weight */
 .compare-weight { max-width: 760px; margin-bottom: 64px; }
 .compare-weight p { color: var(--muted); font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
-.weight-bars { display: grid; gap: 8px; margin-top: 18px; }
-.wb { display: flex; align-items: center; gap: 12px; }
-.wb i { display: block; height: 10px; border-radius: 999px; }
-.wb b { font-weight: 400; font-size: 0.78rem; color: var(--dim); white-space: nowrap; }
-.wb-small i { width: calc((100% - 70px) / 7); background: var(--red); }
-.wb-full i { width: calc(100% - 70px); background: linear-gradient(90deg, rgba(62,230,224,.35), rgba(62,230,224,.8)); }
+.compare-weight strong.red { color: var(--red); }
