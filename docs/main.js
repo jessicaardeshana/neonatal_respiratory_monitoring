@@ -90,7 +90,11 @@
       return cls;
     }
 
+    let lastPaint = 0;
     function frame(now, once = false) {
+      // ~30 fps is plenty for a breathing trace and halves the work per second.
+      if (!once && now - lastPaint < 31) { raf = requestAnimationFrame(frame); return; }
+      if (!once) lastPaint = now;
       const { w, h } = draw.size;
       if (!once) {
         if (last !== null) t += Math.min(0.1, (now - last) / 1000);
@@ -153,6 +157,10 @@
     if (!reduced) whenVisible(hero, () => { if (!raf) { last = null; raf = requestAnimationFrame(frame); } },
                            () => { cancelAnimationFrame(raf); raf = null; });
   }
+
+  // Pause the hero illustration's animations while it is off screen.
+  const scene = document.querySelector(".scene");
+  if (scene) new IntersectionObserver(([e]) => scene.classList.toggle("paused", !e.isIntersecting)).observe(scene);
 
   // ---------- reveals, nav, counter, team photos
   const io = new IntersectionObserver((entries) => {
