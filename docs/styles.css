@@ -165,7 +165,7 @@ canvas { display: block; width: 100%; }
 .solution .lede { max-width: 720px; }
 .compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 22px; align-items: stretch; margin-bottom: 64px; }
 .vs-card { margin: 0; position: relative; border-radius: 22px; overflow: hidden; background: var(--panel); border: 1px solid var(--line); display: flex; flex-direction: column; }
-.vs-card img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.vs-card img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
 .vs-card figcaption { padding: 22px 24px 26px; }
 .vs-card h3 { margin-bottom: 12px; }
 .vs-card ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; color: var(--muted); font-size: 0.96rem; }
@@ -173,7 +173,6 @@ canvas { display: block; width: 100%; }
 .vs-label { position: absolute; top: 14px; left: 14px; z-index: 1; padding: 6px 12px; border-radius: 999px; font-size: 0.72rem; text-transform: uppercase;
   background: rgba(5, 6, 26, 0.85); }
 .vs-today .vs-label { color: var(--red); border: 1px solid rgba(255,77,94,.5); }
-.vs-today img { filter: saturate(.75); }
 .vs-today li::before { content: "✕"; position: absolute; left: 2px; color: var(--red); font-weight: 700; }
 .vs-medaxis { border-color: rgba(62,230,224,.5); }
 .vs-medaxis .vs-label { color: var(--cyan); border: 1px solid rgba(62,230,224,.5); }
@@ -270,3 +269,6 @@ canvas { display: block; width: 100%; }
 
 /* Hero animations stop while the hero is off screen. */
 .scene.paused *, .scene.paused { animation-play-state: paused !important; }
+.speed { color: var(--amber); font-size: 0.68rem; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,181,71,.45); }
+.speed[hidden] { display: none; }
+@media (max-width: 560px) { .monitor-bar > .dim { display: none; } }

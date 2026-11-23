@@ -64,9 +64,16 @@
     const WINDOW = 16; // seconds visible
     const draw = () => {};
     const ctx = setupCanvas(hero, draw);
-    // Start just after the recorded apnea, so visitors first see ~30 s of calm
-    // breathing, then the pause -> apnea alert sequence.
-    let t = (apnea.length ? apnea[0][1] + 1 : 0) + WINDOW, last = null, raf = null;
+    // Start 2 s before the recorded breathing stop, so the pause and the
+    // apnea alert appear almost straight away.
+    let t = apnea.length ? apnea[0][0] - 2 : WINDOW, last = null, raf = null;
+    const speedEl = document.getElementById("hero-speed");
+    // Fast-forward (4x, labelled) through the long stretch without breathing.
+    const FAST = 4;
+    const speedAt = (tt) => {
+      const s = ((tt % total) + total) % total;
+      return apnea.some(([a, b]) => s > a + 1.5 && s < b - 1) ? FAST : 1;
+    };
 
     const sample = (s) => {
       const i = ((s % total) + total) % total * fs;
@@ -84,6 +91,7 @@
         else if (d >= 10) { cls = "pause"; text = "Pause"; read = `${Math.floor(d)} s`; }
         else { text = "No breath"; read = `${Math.floor(d)} s`; }
       } else if (apnea.some(([a, b]) => s > b && s < b + 5)) { text = "Breathing resumed"; }
+      if (speedEl) speedEl.hidden = speedAt(tt) === 1;
       status.className = "status " + cls;
       stateEl.textContent = text;
       readout.textContent = read;
@@ -97,7 +105,7 @@
       if (!once) lastPaint = now;
       const { w, h } = draw.size;
       if (!once) {
-        if (last !== null) t += Math.min(0.1, (now - last) / 1000);
+        if (last !== null) t += Math.min(0.1, (now - last) / 1000) * speedAt(t);
         last = now;
       }
       ctx.clearRect(0, 0, w, h);
