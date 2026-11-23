@@ -120,17 +120,15 @@
       grad.addColorStop(0.25, "rgba(62,230,224,0.55)");
       grad.addColorStop(1, cls === "apnea" ? C.red : C.cyan);
       ctx.strokeStyle = grad;
-      ctx.lineWidth = 2.2;
-      ctx.shadowColor = cls === "apnea" ? C.red : C.cyan;
-      ctx.shadowBlur = 12;
+      ctx.lineJoin = "round";
       ctx.beginPath();
       const step = WINDOW / w * 1.5;
       for (let s = x0; s <= t; s += step) {
         const px = toX(s), py = mid - sample(s) * amp;
         s === x0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
       }
-      ctx.stroke();
-      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.18; ctx.lineWidth = 8; ctx.stroke();   // soft glow
+      ctx.globalAlpha = 1; ctx.lineWidth = 2.2; ctx.stroke();
 
       // Detected breaths
       ctx.fillStyle = "rgba(255,255,255,0.85)";
@@ -145,9 +143,8 @@
       // Leading dot
       const ly = mid - sample(t) * amp;
       ctx.fillStyle = cls === "apnea" ? C.red : C.cyan;
-      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 18;
-      ctx.beginPath(); ctx.arc(w - 1, ly, 4.5, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(w - 1, ly, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(w - 1, ly, 4.5, 0, Math.PI * 2); ctx.fill();
 
       if (!reduced && !once) raf = requestAnimationFrame(frame);
     }
