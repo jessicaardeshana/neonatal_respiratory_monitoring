@@ -178,15 +178,6 @@ canvas { display: block; width: 100%; }
 .vs-medaxis li::before { content: "✓"; position: absolute; left: 2px; color: var(--cyan); font-weight: 700; }
 .vs-badge { align-self: center; width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
   font: 600 1rem var(--font-display); color: var(--text); background: var(--bg-2); border: 1px solid var(--line); }
-.features ul { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
-.features-title { font-size: 1.4rem; margin-bottom: 18px; }
-.features ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
-.features li { display: flex; flex-direction: column; padding: 14px 18px 14px 44px; position: relative; border-radius: 14px;
-  background: var(--panel); border: 1px solid var(--line); }
-.features li::before { content: ""; position: absolute; left: 18px; top: 21px; width: 10px; height: 10px; border-radius: 50%;
-  background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
-.features b { font-family: var(--font-display); font-weight: 600; }
-.features span { color: var(--muted); font-size: 0.94rem; }
 
 /* ---------- team ---------- */
 .people { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
@@ -264,7 +255,6 @@ canvas { display: block; width: 100%; }
 .contact-card h2 { margin-top: 4px; }
 .punch { margin: 0 auto; }
 .person a { display: inline-block; margin-top: 10px; }
-@media (min-width: 1100px) { .features ul { grid-template-columns: repeat(5, 1fr); } .features li { padding: 16px 16px 16px 38px; } .features li::before { left: 16px; } }
 
 /* Hero animations stop while the hero is off screen. */
 .scene.paused *, .scene.paused { animation-play-state: paused !important; }
@@ -291,3 +281,14 @@ canvas { display: block; width: 100%; }
 .compare-weight { max-width: 760px; margin-bottom: 64px; }
 .compare-weight p { color: var(--muted); font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
 .compare-weight strong.red { color: var(--red); }
+
+/* Closing "stay tuned" */
+.tuned { text-align: center; padding-top: 40px !important; }
+.tuned-line { width: min(520px, 100%); height: 52px; margin: 0 auto 26px; display: block; }
+.tuned-line path { fill: none; stroke: var(--cyan); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 700; stroke-dashoffset: 700; }
+.tuned-inner.in .tuned-line path { animation: draw 2.4s ease-out forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.tuned h2 { font-weight: 600; }
+.tuned-sub { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.2; margin-top: 6px; display: inline-block; }
+@media (prefers-reduced-motion: reduce) { .tuned-line path { stroke-dashoffset: 0; } }
+.step h3 { margin-top: 18px; }
