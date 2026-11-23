@@ -134,11 +134,10 @@ canvas { display: block; width: 100%; }
 .lens-depth { fill: #0d4a5c; stroke: var(--cyan); }
 .lens-thermal { fill: #5a1f33; stroke: #ff8a6b; }
 .led { fill: var(--cyan); animation: blink 2.4s ease-in-out infinite; }
-.chest { transform-box: fill-box; transform-origin: 50% 100%; animation: breathe-y 2.2s ease-in-out infinite; }
-@keyframes breathe-y { 50% { transform: scaleY(1.28); } }
-.contour ellipse { fill: none; stroke: var(--cyan); stroke-width: 1.2; transform-box: fill-box; transform-origin: center; animation: ripple 2.2s ease-in-out infinite; }
+.chest { transform-box: fill-box; transform-origin: 50% 100%; }
+.contour { transform-box: fill-box; transform-origin: center; }
+.contour ellipse { fill: none; stroke: var(--cyan); stroke-width: 1.2; transition: stroke .4s; }
 .contour ellipse:nth-child(2) { opacity: .7; } .contour ellipse:nth-child(3) { opacity: .5; }
-@keyframes ripple { 50% { transform: translateY(-3px) scale(1.06); } }
 .tag rect { fill: rgba(10, 12, 42, .85); stroke: var(--line); }
 .tag text { fill: var(--text); font: 500 13px var(--font-body); }
 .tag-dot { fill: var(--cyan); }
@@ -235,7 +234,7 @@ canvas { display: block; width: 100%; }
   .journey { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .aurora span, .status i, .scanline, .led, .chest, .contour ellipse { animation: none; }
+  .aurora span, .status i, .scanline, .led { animation: none; }
   .reveal { opacity: 1; transform: none; transition: none; }
   html { scroll-behavior: auto; }
 }
@@ -272,3 +271,18 @@ canvas { display: block; width: 100%; }
 .speed { color: var(--amber); font-size: 0.68rem; padding: 3px 8px; border-radius: 999px; border: 1px solid rgba(255,181,71,.45); }
 .speed[hidden] { display: none; }
 @media (max-width: 560px) { .monitor-bar > .dim { display: none; } }
+
+/* Hero illustration follows the monitor: amber on a pause, red on apnea. */
+.scene-pill { opacity: 0; transition: opacity .3s; }
+.scene-pill rect { fill: rgba(10, 12, 42, .9); stroke-width: 1.2; }
+.scene-pill text { font: 600 12px var(--font-mono); letter-spacing: .06em; text-transform: uppercase; }
+.pill-pause rect { stroke: var(--amber); } .pill-pause text { fill: var(--amber); }
+.pill-apnea rect { stroke: var(--red); } .pill-apnea text { fill: var(--red); }
+.scene[data-state="pause"] .pill-pause, .scene[data-state="apnea"] .pill-apnea { opacity: 1; }
+.scene[data-state="pause"] .field { fill: url(#beamPause); }
+.scene[data-state="apnea"] .field { fill: url(#beamAlert); }
+.scene[data-state="pause"] .contour ellipse, .scene[data-state="pause"] .scanline { stroke: var(--amber); }
+.scene[data-state="apnea"] .contour ellipse, .scene[data-state="apnea"] .scanline { stroke: var(--red); }
+.scene[data-state="pause"] .led { fill: var(--amber); }
+.scene[data-state="apnea"] .led { fill: var(--red); animation-duration: .6s; }
+.scene[data-state="apnea"] .monitor { border-color: rgba(255, 77, 94, .45); }

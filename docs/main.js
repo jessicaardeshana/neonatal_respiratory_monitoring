@@ -68,6 +68,9 @@
     // apnea alert appear almost straight away.
     let t = apnea.length ? apnea[0][0] - 2 : WINDOW, last = null, raf = null;
     const speedEl = document.getElementById("hero-speed");
+    const scene = document.querySelector(".scene");
+    const chest = document.querySelector(".scene .chest");
+    const contour = document.querySelector(".scene .contour");
     // Fast-forward (4x, labelled) through the long stretch without breathing.
     const FAST = 4;
     const speedAt = (tt) => {
@@ -92,6 +95,7 @@
         else { text = "No breath"; read = `${Math.floor(d)} s`; }
       } else if (apnea.some(([a, b]) => s > b && s < b + 5)) { text = "Breathing resumed"; }
       if (speedEl) speedEl.hidden = speedAt(tt) === 1;
+      if (scene && scene.dataset.state !== cls) scene.dataset.state = cls;
       status.className = "status " + cls;
       stateEl.textContent = text;
       readout.textContent = read;
@@ -150,6 +154,13 @@
           if (s < x0 || s > t) continue;
           ctx.beginPath(); ctx.arc(toX(s), mid - sample(s) * amp, 2.6, 0, Math.PI * 2); ctx.fill();
         }
+      }
+
+      // Illustration: the baby's chest and depth contours move with the same signal.
+      if (chest) {
+        const v = Math.max(0, Math.min(1, (sample(t) + 1.2) / 2.4));
+        chest.style.transform = `scaleY(${(0.9 + 0.4 * v).toFixed(3)})`;
+        contour.style.transform = `translateY(${(-4 * v).toFixed(2)}px) scale(${(0.96 + 0.1 * v).toFixed(3)})`;
       }
 
       // Leading dot

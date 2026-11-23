@@ -54,6 +54,14 @@
               <stop offset="0" stop-color="#3ee6e0" stop-opacity=".38"/>
               <stop offset="1" stop-color="#3ee6e0" stop-opacity="0"/>
             </linearGradient>
+            <linearGradient id="beamPause" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffb547" stop-opacity=".38"/>
+              <stop offset="1" stop-color="#ffb547" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="beamAlert" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ff4d5e" stop-opacity=".45"/>
+              <stop offset="1" stop-color="#ff4d5e" stop-opacity="0"/>
+            </linearGradient>
             <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0" stop-color="#2a3170"/><stop offset="1" stop-color="#11143a"/>
             </linearGradient>
@@ -90,6 +98,9 @@
             <ellipse cx="258" cy="228" rx="30" ry="6"/>
             <ellipse cx="258" cy="228" rx="14" ry="3"/>
           </g>
+          <!-- alert pill: shown while the monitor reports a pause / apnea -->
+          <g class="scene-pill pill-pause"><rect x="205" y="176" width="110" height="26" rx="13"/><text x="260" y="193.5" text-anchor="middle">Pause</text></g>
+          <g class="scene-pill pill-apnea"><rect x="190" y="176" width="140" height="26" rx="13"/><text x="260" y="193.5" text-anchor="middle">Apnea detected</text></g>
           <!-- labels -->
           <g class="tag"><rect x="40" y="120" width="104" height="28" rx="14"/><circle cx="58" cy="134" r="4" class="tag-dot"/><text x="70" y="138">No wires</text></g>
           <g class="tag"><rect x="326" y="150" width="134" height="28" rx="14"/><circle cx="344" cy="164" r="4" class="tag-dot"/><text x="356" y="168">No adhesives</text></g>
