@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MedAxis · Every breath, seen. Without a single touch.</title>
-  <meta name="description" content="MedAxis is building contact-free breathing monitoring for premature infants: no wires, no adhesives on fragile skin.">
+  <title>MedAxis · Contact-free respiratory monitoring for premature infants</title>
+  <meta name="description" content="MedAxis is developing an intelligent, depth-imaging system to track breathing movements and support more reliable apnea monitoring in neonatal intensive care units.">
   <meta name="theme-color" content="#05061a">
   <meta property="og:title" content="MedAxis">
-  <meta property="og:description" content="Every breath, seen. Without a single touch.">
+  <meta property="og:description" content="Contact-free respiratory monitoring for premature infants.">
   <link rel="icon" href="assets/img/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -38,66 +38,161 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-copy reveal">
-        <p class="eyebrow">Contact-free neonatal monitoring</p>
-        <h1>Every breath, seen.<br><span class="grad">Without a single touch.</span></h1>
-        <p class="lede">MedAxis watches premature infants breathe from a distance — no wires, no adhesives on fragile skin.</p>
+        <p class="eyebrow">For the NICU</p>
+        <h1>Contact-free respiratory monitoring for <span class="grad">premature infants.</span></h1>
+        <p class="lede">MedAxis is developing an intelligent, depth-imaging system to track breathing movements and support more reliable apnea monitoring in neonatal intensive care units.</p>
         <div class="cta-row">
           <a class="btn" href="#contact">Get in touch</a>
-          <a class="btn btn-ghost" href="#solution">How it works</a>
+          <a class="btn btn-ghost" href="#why">Why it matters</a>
         </div>
       </div>
 
-      <figure class="monitor reveal" aria-label="Animated breathing signal from the MedAxis prototype">
-        <div class="monitor-bar">
-          <span class="mono dim">RESP · CONTACT-FREE</span>
-          <span class="status" id="hero-status"><i></i><b id="hero-state">Breathing</b></span>
-          <span class="mono readout" id="hero-readout">— /min</span>
+      <figure class="scene reveal" aria-label="Illustration: the MedAxis sensor above a baby in a NICU bed, tracking breathing without touching the baby">
+        <svg class="scene-art" viewBox="0 0 520 330" aria-hidden="true">
+          <defs>
+            <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#3ee6e0" stop-opacity=".38"/>
+              <stop offset="1" stop-color="#3ee6e0" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="metal" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#2a3170"/><stop offset="1" stop-color="#11143a"/>
+            </linearGradient>
+            <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#9fb3ff" stop-opacity=".10"/><stop offset="1" stop-color="#9fb3ff" stop-opacity=".02"/>
+            </linearGradient>
+          </defs>
+          <!-- mount -->
+          <path class="arm" d="M470 312 V40 Q470 26 456 26 H330"/>
+          <!-- sensing field -->
+          <polygon class="field" points="215,70 305,70 420,250 100,250"/>
+          <line class="scanline" x1="120" x2="400" y1="80" y2="80"/>
+          <!-- sensor head -->
+          <rect x="190" y="38" width="140" height="34" rx="12" fill="url(#metal)" stroke="rgba(150,165,255,.45)"/>
+          <circle cx="222" cy="55" r="7" class="lens"/>
+          <circle cx="260" cy="55" r="10" class="lens lens-depth"/>
+          <circle cx="298" cy="55" r="7" class="lens lens-thermal"/>
+          <rect x="236" y="67" width="48" height="3" rx="1.5" class="led"/>
+          <!-- bed -->
+          <rect x="80" y="262" width="360" height="22" rx="8" fill="#151a4a" stroke="rgba(150,165,255,.3)"/>
+          <path d="M90 262 V214 Q90 204 100 204 H420 Q430 204 430 214 V262" fill="url(#hood)" stroke="rgba(150,165,255,.28)"/>
+          <rect x="105" y="250" width="310" height="12" rx="6" fill="#222a66"/>
+          <path d="M140 284 V312 M380 284 V312 M120 312 H400" stroke="rgba(150,165,255,.3)" stroke-width="3" fill="none"/>
+          <!-- baby -->
+          <g class="baby">
+            <circle cx="188" cy="232" r="19" fill="#f2c7b0"/>
+            <path d="M172 222 Q186 206 204 220" fill="none" stroke="#d9a58c" stroke-width="3" stroke-linecap="round"/>
+            <g class="chest"><ellipse cx="265" cy="238" rx="62" ry="15" fill="#e9edff"/></g>
+            <path d="M310 236 Q330 236 336 246" stroke="#e9edff" stroke-width="10" stroke-linecap="round" fill="none"/>
+          </g>
+          <!-- depth contours on the chest -->
+          <g class="contour">
+            <ellipse cx="258" cy="228" rx="46" ry="9"/>
+            <ellipse cx="258" cy="228" rx="30" ry="6"/>
+            <ellipse cx="258" cy="228" rx="14" ry="3"/>
+          </g>
+          <!-- labels -->
+          <g class="tag"><rect x="40" y="120" width="104" height="28" rx="14"/><circle cx="58" cy="134" r="4" class="tag-dot"/><text x="70" y="138">No wires</text></g>
+          <g class="tag"><rect x="326" y="150" width="134" height="28" rx="14"/><circle cx="344" cy="164" r="4" class="tag-dot"/><text x="356" y="168">No adhesives</text></g>
+        </svg>
+        <div class="monitor">
+          <div class="monitor-bar">
+            <span class="mono dim">RESP · CONTACT-FREE</span>
+            <span class="status" id="hero-status"><i></i><b id="hero-state">Breathing</b></span>
+            <span class="mono readout" id="hero-readout">— /min</span>
+          </div>
+          <canvas id="hero-signal" height="110"></canvas>
         </div>
-        <canvas id="hero-signal" height="260"></canvas>
-        <figcaption class="mono dim">Signal captured by our prototype</figcaption>
+        <figcaption class="mono dim">Concept illustration · signal captured by our prototype</figcaption>
       </figure>
     </section>
 
     <!-- WHY -->
     <section class="story" id="why">
       <p class="eyebrow reveal">Why it matters</p>
-      <h2 class="story-line reveal">In the NICU, we met a baby weighing</h2>
+      <h2 class="story-line reveal">While shadowing in a NICU, we met a baby weighing just</h2>
       <p class="big-number reveal" aria-label="500 grams"><span id="grams" data-to="500">0</span><small>grams</small></p>
-      <p class="punch reveal">Today, babies this small are monitored with <strong>adhesive electrodes on skin this fragile</strong> — and nurses told us the breathing signal is <strong>noisy and unreliable</strong>.</p>
+
+      <ol class="journey">
+        <li class="step reveal">
+          <span class="step-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17"/><path d="M24 14v10l7 5"/></svg></span>
+          <span class="step-num mono">01</span>
+          <h3>Born too early</h3>
+          <p>Premature babies arrive weeks or months before they're ready.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 34h32M10 34V24a14 10 0 0 1 28 0v10"/><circle cx="19" cy="29" r="3"/><path d="M23 30h10"/></svg></span>
+          <span class="step-num mono">02</span>
+          <h3>Into the NICU</h3>
+          <p>They live in an incubator, closely monitored until they grow strong enough to go home.</p>
+        </li>
+        <li class="step reveal">
+          <span class="step-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="12" y="16" width="24" height="16" rx="4"/><path d="M18 16V8M30 16V8M24 32v8"/><circle cx="18" cy="24" r="1.5"/><circle cx="30" cy="24" r="1.5"/></svg></span>
+          <span class="step-num mono">03</span>
+          <h3>Wired up</h3>
+          <p>Vital signs are tracked with electrodes and adhesives on their fragile skin.</p>
+        </li>
+        <li class="step step-alert reveal">
+          <span class="step-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M4 26l5-3 3 8 4-16 3 13 3-6 3 5 4-12 3 15 3-7 3 4 6-2"/></svg></span>
+          <span class="step-num mono">04</span>
+          <h3>A noisy signal</h3>
+          <p>Respiration, one of the key signals nurses watch, is often the least reliable.</p>
+        </li>
+      </ol>
+      <p class="punch reveal">They deserve <strong>better.</strong></p>
     </section>
 
     <!-- SOLUTION -->
-    <section class="approach" id="solution">
+    <section class="solution" id="solution">
       <div class="section-head reveal">
         <p class="eyebrow">The MedAxis solution</p>
         <h2>Monitoring, reimagined.</h2>
+        <p class="lede">We are developing a device that monitors a baby's breathing <strong>without touching them</strong>. It sits above the bed and watches every breath from a distance.</p>
       </div>
 
-      <div class="modes">
-        <article class="mode reveal">
-          <div class="mode-art depth-art" aria-hidden="true">
-            <svg viewBox="0 0 200 120"><g class="contours">
-              <ellipse cx="100" cy="66" rx="78" ry="34"/><ellipse cx="100" cy="66" rx="58" ry="24"/>
-              <ellipse cx="100" cy="66" rx="38" ry="15"/><ellipse cx="100" cy="66" rx="18" ry="7"/></g></svg>
-          </div>
-          <h3>Nothing touches the baby</h3>
-          <p>No wires or adhesives. Breathing is measured from a distance.</p>
-        </article>
-        <article class="mode reveal">
-          <div class="mode-art thermal-art" aria-hidden="true">
-            <svg viewBox="0 0 200 120"><defs><radialGradient id="heat"><stop offset="0" stop-color="#ffd36b"/><stop offset=".45" stop-color="#ff5a6b"/><stop offset="1" stop-color="#ff5a6b" stop-opacity="0"/></radialGradient></defs>
-              <circle class="heat" cx="100" cy="60" r="44" fill="url(#heat)"/></svg>
-          </div>
-          <h3>Sees every breath</h3>
-          <p>Depth and thermal imaging capture the rise of the chest and the warmth of each breath.</p>
-        </article>
-        <article class="mode mode-result reveal">
-          <div class="mode-art result-art" aria-hidden="true">
-            <svg viewBox="0 0 200 120"><path class="clean-wave" d="M0 60 C 15 30, 25 30, 40 60 S 65 90, 80 60 S 105 30, 120 60 S 145 90, 160 60 S 185 30, 200 60"/></svg>
-          </div>
-          <h3>Smarter alerts</h3>
-          <p>AI-assisted breathing analysis, built to catch apnea early and help nurses focus.</p>
-        </article>
+      <div class="device-row">
+        <figure class="device reveal" aria-label="Illustration of the MedAxis sensor">
+          <svg viewBox="0 0 520 340" aria-hidden="true">
+            <defs>
+              <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#323a85"/><stop offset=".55" stop-color="#171b4d"/><stop offset="1" stop-color="#0c0f33"/>
+              </linearGradient>
+              <radialGradient id="glassC" cx=".35" cy=".35"><stop offset="0" stop-color="#7ff6f1"/><stop offset=".35" stop-color="#1b6f8a"/><stop offset="1" stop-color="#050820"/></radialGradient>
+              <radialGradient id="glassT" cx=".35" cy=".35"><stop offset="0" stop-color="#ffd36b"/><stop offset=".35" stop-color="#a3304a"/><stop offset="1" stop-color="#140616"/></radialGradient>
+              <radialGradient id="glassI" cx=".35" cy=".35"><stop offset="0" stop-color="#b9a6ff"/><stop offset=".4" stop-color="#3a2a8a"/><stop offset="1" stop-color="#070720"/></radialGradient>
+              <radialGradient id="halo"><stop offset="0" stop-color="#3ee6e0" stop-opacity=".35"/><stop offset="1" stop-color="#3ee6e0" stop-opacity="0"/></radialGradient>
+            </defs>
+            <ellipse cx="260" cy="190" rx="230" ry="120" fill="url(#halo)"/>
+            <!-- arm -->
+            <path d="M260 20 V92" stroke="#2a3170" stroke-width="16" stroke-linecap="round"/>
+            <rect x="236" y="84" width="48" height="22" rx="6" fill="#1d2260" stroke="rgba(150,165,255,.35)"/>
+            <!-- body -->
+            <rect x="70" y="104" width="380" height="120" rx="40" fill="url(#body)" stroke="rgba(150,165,255,.5)" stroke-width="1.5"/>
+            <rect x="90" y="112" width="340" height="18" rx="9" fill="rgba(255,255,255,.06)"/>
+            <!-- lenses -->
+            <g class="dlens"><circle cx="160" cy="166" r="26" fill="#070a24" stroke="rgba(150,165,255,.4)"/><circle cx="160" cy="166" r="17" fill="url(#glassI)"/></g>
+            <g class="dlens"><circle cx="260" cy="166" r="36" fill="#070a24" stroke="rgba(150,165,255,.45)"/><circle cx="260" cy="166" r="25" fill="url(#glassC)"/><circle cx="252" cy="157" r="5" fill="#fff" opacity=".7"/></g>
+            <g class="dlens"><circle cx="360" cy="166" r="26" fill="#070a24" stroke="rgba(150,165,255,.4)"/><circle cx="360" cy="166" r="17" fill="url(#glassT)"/></g>
+            <!-- status light -->
+            <rect x="210" y="210" width="100" height="5" rx="2.5" class="led"/>
+            <text x="404" y="140" class="dev-mark">MEDΛXIS</text>
+            <!-- callouts -->
+            <g class="callout"><path d="M160 192 V262 H120"/><text x="22" y="267">Infrared</text></g>
+            <g class="callout"><path d="M260 202 V292"/><text x="260" y="314" text-anchor="middle">Depth camera</text></g>
+            <g class="callout"><path d="M360 192 V262 H400"/><text x="406" y="267">Thermal</text></g>
+          </svg>
+          <figcaption class="mono dim">Concept illustration</figcaption>
+        </figure>
+
+        <div class="features reveal">
+          <h3 class="features-title">Features of our device</h3>
+          <ul>
+            <li><b>Completely contact-free</b><span>No wires or adhesives on the baby's skin.</span></li>
+            <li><b>Depth + thermal imaging</b><span>Sees the rise of the chest and the warmth of each breath.</span></li>
+            <li><b>Continuous breathing signal</b><span>A clean, live respiratory waveform and rate.</span></li>
+            <li><b>Smarter apnea alerts</b><span>AI-assisted analysis, built to flag pauses in breathing early.</span></li>
+            <li><b>Made for the NICU</b><span>Mounts above the bed, out of the way of care.</span></li>
+          </ul>
+        </div>
       </div>
     </section>
 
@@ -109,13 +204,13 @@
       </div>
       <div class="people">
         <article class="person reveal" data-initials="BB"><img src="assets/team/bobby.jpg" alt="Bobby Bhandari" loading="lazy">
-          <h3>Bobby Bhandari</h3><p class="role">Embedded systems engineering</p></article>
+          <h3>Bobby Bhandari</h3><p class="role">Embedded systems engineering</p><a href="mailto:bbhand@unc.edu">bbhand@unc.edu</a></article>
         <article class="person reveal" data-initials="AM"><img src="assets/team/allen.jpg" alt="Allen Ma" loading="lazy">
-          <h3>Allen Ma</h3><p class="role">Pre-Med · Clinical connections</p></article>
+          <h3>Allen Ma</h3><p class="role">Pre-Med · Clinical connections</p><a href="mailto:allem@unc.edu">allem@unc.edu</a></article>
         <article class="person reveal" data-initials="AS"><img src="assets/team/alan.jpg" alt="Alan Saj" loading="lazy">
-          <h3>Alan Saj</h3><p class="role">Data science</p></article>
+          <h3>Alan Saj</h3><p class="role">Data science</p><a href="mailto:alansaj@unc.edu">alansaj@unc.edu</a></article>
         <article class="person reveal" data-initials="JA"><img src="assets/team/jessica.jpg" alt="Jessica Ardeshana" loading="lazy">
-          <h3>Jessica Ardeshana</h3><p class="role">Data science</p></article>
+          <h3>Jessica Ardeshana</h3><p class="role">Data science</p><a href="mailto:jgardesh@ncsu.edu">jgardesh@ncsu.edu</a></article>
       </div>
     </section>
 
@@ -126,9 +221,9 @@
         <h2>Let's talk.</h2>
         <p class="lede">Interested in what we're building? We'd love to hear from you.</p>
         <ul class="contact-list">
-          <li><a href="mailto:bbhanda@ncsu.edu?subject=Hello%20MedAxis"><span>Bobby Bhandari</span><b>bbhanda@ncsu.edu</b></a></li>
-          <li><a href="mailto:asma@ncsu.edu?subject=Hello%20MedAxis"><span>Allen Ma</span><b>asma@ncsu.edu</b></a></li>
-          <li><a href="mailto:assaj2@ncsu.edu?subject=Hello%20MedAxis"><span>Alan Saj</span><b>assaj2@ncsu.edu</b></a></li>
+          <li><a href="mailto:bbhand@unc.edu?subject=Hello%20MedAxis"><span>Bobby Bhandari</span><b>bbhand@unc.edu</b></a></li>
+          <li><a href="mailto:allem@unc.edu?subject=Hello%20MedAxis"><span>Allen Ma</span><b>allem@unc.edu</b></a></li>
+          <li><a href="mailto:alansaj@unc.edu?subject=Hello%20MedAxis"><span>Alan Saj</span><b>alansaj@unc.edu</b></a></li>
           <li><a href="mailto:jgardesh@ncsu.edu?subject=Hello%20MedAxis"><span>Jessica Ardeshana</span><b>jgardesh@ncsu.edu</b></a></li>
         </ul>
       </div>
