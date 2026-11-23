@@ -292,3 +292,6 @@ canvas { display: block; width: 100%; }
 .tuned-sub { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4vw, 3.1rem); line-height: 1.2; margin-top: 6px; display: inline-block; }
 @media (prefers-reduced-motion: reduce) { .tuned-line path { stroke-dashoffset: 0; } }
 .step h3 { margin-top: 18px; }
+.hero-status-line { display: inline-flex; align-items: center; gap: 12px; font-family: var(--font-mono); font-size: 0.95rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.dev-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); animation: blink 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dev-dot { animation: none; } }
