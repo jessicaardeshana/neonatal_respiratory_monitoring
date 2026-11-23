@@ -259,7 +259,7 @@ canvas { display: block; width: 100%; }
 @media (max-width: 720px) { .contact-list { grid-template-columns: 1fr; } }
 
 /* Why: one punchy sentence under the big number */
-.big-number { margin-bottom: 56px; }
+.big-number { margin-bottom: 18px; }
 .punch { text-align: center; font-family: var(--font-display); font-size: clamp(1.3rem, 2.4vw, 1.9rem); line-height: 1.35; color: var(--muted); max-width: 880px; }
 .contact-card h2 { margin-top: 4px; }
 .punch { margin: 0 auto; }
@@ -286,3 +286,13 @@ canvas { display: block; width: 100%; }
 .scene[data-state="pause"] .led { fill: var(--amber); }
 .scene[data-state="apnea"] .led { fill: var(--red); animation-duration: .6s; }
 .scene[data-state="apnea"] .monitor { border-color: rgba(255, 77, 94, .45); }
+
+/* 500 g vs a healthy birth weight */
+.compare-weight { max-width: 760px; margin-bottom: 64px; }
+.compare-weight p { color: var(--muted); font-size: clamp(1.05rem, 1.8vw, 1.3rem); }
+.weight-bars { display: grid; gap: 8px; margin-top: 18px; }
+.wb { display: flex; align-items: center; gap: 12px; }
+.wb i { display: block; height: 10px; border-radius: 999px; }
+.wb b { font-weight: 400; font-size: 0.78rem; color: var(--dim); white-space: nowrap; }
+.wb-small i { width: calc((100% - 70px) / 7); background: var(--red); }
+.wb-full i { width: calc(100% - 70px); background: linear-gradient(90deg, rgba(62,230,224,.35), rgba(62,230,224,.8)); }
