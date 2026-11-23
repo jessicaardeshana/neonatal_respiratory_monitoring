@@ -149,50 +149,43 @@
         <p class="lede">We are developing a device that monitors a baby's breathing <strong>without touching them</strong>. It sits above the bed and watches every breath from a distance.</p>
       </div>
 
-      <div class="device-row">
-        <figure class="device reveal" aria-label="Illustration of the MedAxis sensor">
-          <svg viewBox="0 0 520 340" aria-hidden="true">
-            <defs>
-              <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#323a85"/><stop offset=".55" stop-color="#171b4d"/><stop offset="1" stop-color="#0c0f33"/>
-              </linearGradient>
-              <radialGradient id="glassC" cx=".35" cy=".35"><stop offset="0" stop-color="#7ff6f1"/><stop offset=".35" stop-color="#1b6f8a"/><stop offset="1" stop-color="#050820"/></radialGradient>
-              <radialGradient id="glassT" cx=".35" cy=".35"><stop offset="0" stop-color="#ffd36b"/><stop offset=".35" stop-color="#a3304a"/><stop offset="1" stop-color="#140616"/></radialGradient>
-              <radialGradient id="glassI" cx=".35" cy=".35"><stop offset="0" stop-color="#b9a6ff"/><stop offset=".4" stop-color="#3a2a8a"/><stop offset="1" stop-color="#070720"/></radialGradient>
-              <radialGradient id="halo"><stop offset="0" stop-color="#3ee6e0" stop-opacity=".35"/><stop offset="1" stop-color="#3ee6e0" stop-opacity="0"/></radialGradient>
-            </defs>
-            <ellipse cx="260" cy="190" rx="230" ry="120" fill="url(#halo)"/>
-            <!-- arm -->
-            <path d="M260 20 V92" stroke="#2a3170" stroke-width="16" stroke-linecap="round"/>
-            <rect x="236" y="84" width="48" height="22" rx="6" fill="#1d2260" stroke="rgba(150,165,255,.35)"/>
-            <!-- body -->
-            <rect x="70" y="104" width="380" height="120" rx="40" fill="url(#body)" stroke="rgba(150,165,255,.5)" stroke-width="1.5"/>
-            <rect x="90" y="112" width="340" height="18" rx="9" fill="rgba(255,255,255,.06)"/>
-            <!-- lenses -->
-            <g class="dlens"><circle cx="160" cy="166" r="26" fill="#070a24" stroke="rgba(150,165,255,.4)"/><circle cx="160" cy="166" r="17" fill="url(#glassI)"/></g>
-            <g class="dlens"><circle cx="260" cy="166" r="36" fill="#070a24" stroke="rgba(150,165,255,.45)"/><circle cx="260" cy="166" r="25" fill="url(#glassC)"/><circle cx="252" cy="157" r="5" fill="#fff" opacity=".7"/></g>
-            <g class="dlens"><circle cx="360" cy="166" r="26" fill="#070a24" stroke="rgba(150,165,255,.4)"/><circle cx="360" cy="166" r="17" fill="url(#glassT)"/></g>
-            <!-- status light -->
-            <rect x="210" y="210" width="100" height="5" rx="2.5" class="led"/>
-            <text x="404" y="140" class="dev-mark">MEDΛXIS</text>
-            <!-- callouts -->
-            <g class="callout"><path d="M160 192 V262 H120"/><text x="22" y="267">Infrared</text></g>
-            <g class="callout"><path d="M260 202 V292"/><text x="260" y="314" text-anchor="middle">Depth camera</text></g>
-            <g class="callout"><path d="M360 192 V262 H400"/><text x="406" y="267">Thermal</text></g>
-          </svg>
-          <figcaption class="mono dim">Concept illustration</figcaption>
+      <div class="compare">
+        <figure class="vs-card vs-today reveal">
+          <span class="vs-label mono">Today</span>
+          <img src="assets/img/today.jpg" alt="An infant manikin with adhesive electrodes and wires on its chest, connected to a bedside monitor" loading="lazy" width="500" height="372">
+          <figcaption>
+            <h3>Wired and stuck to the skin</h3>
+            <ul>
+              <li>Adhesive electrodes on fragile skin</li>
+              <li>Wires that get in the way of care</li>
+              <li>A noisy, unreliable breathing signal</li>
+            </ul>
+          </figcaption>
         </figure>
+        <span class="vs-badge" aria-hidden="true">vs</span>
+        <figure class="vs-card vs-medaxis reveal">
+          <span class="vs-label mono">MedAxis</span>
+          <img src="assets/img/medaxis_device.jpg" alt="Concept render of the MedAxis sensor on an arm above a sleeping infant, sensing breathing from a distance" loading="lazy" width="506" height="372">
+          <figcaption>
+            <h3>Nothing touches the baby</h3>
+            <ul>
+              <li>Sensor mounted above the bed</li>
+              <li>Depth and thermal imaging see every breath</li>
+              <li>Smarter, AI-assisted apnea alerts</li>
+            </ul>
+          </figcaption>
+        </figure>
+      </div>
 
-        <div class="features reveal">
-          <h3 class="features-title">Features of our device</h3>
-          <ul>
-            <li><b>Completely contact-free</b><span>No wires or adhesives on the baby's skin.</span></li>
-            <li><b>Depth + thermal imaging</b><span>Sees the rise of the chest and the warmth of each breath.</span></li>
-            <li><b>Continuous breathing signal</b><span>A clean, live respiratory waveform and rate.</span></li>
-            <li><b>Smarter apnea alerts</b><span>AI-assisted analysis, built to flag pauses in breathing early.</span></li>
-            <li><b>Made for the NICU</b><span>Mounts above the bed, out of the way of care.</span></li>
-          </ul>
-        </div>
+      <div class="features reveal">
+        <h3 class="features-title">Features of our device</h3>
+        <ul>
+          <li><b>Completely contact-free</b><span>No wires or adhesives on the baby's skin.</span></li>
+          <li><b>Depth + thermal imaging</b><span>Sees the rise of the chest and the warmth of each breath.</span></li>
+          <li><b>Continuous breathing signal</b><span>A clean, live respiratory waveform and rate.</span></li>
+          <li><b>Smarter apnea alerts</b><span>AI-assisted analysis, built to flag pauses in breathing early.</span></li>
+          <li><b>Made for the NICU</b><span>Mounts above the bed, out of the way of care.</span></li>
+        </ul>
       </div>
     </section>
 
