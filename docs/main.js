@@ -1,4 +1,4 @@
-// MedAxis site: signal animations, scroll reveals, small interactions.
+// MedAxis site: hero signal animation, scroll reveals, small interactions.
 (() => {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const css = getComputedStyle(document.documentElement);
@@ -157,89 +157,7 @@
                            () => { cancelAnimationFrame(raf); raf = null; });
   }
 
-  // ---------- "today": illustrative noisy impedance-style signal
-  const noisy = document.getElementById("noisy-signal");
-  if (noisy) {
-    const draw = () => {};
-    const ctx = setupCanvas(noisy, draw);
-    let t = 0, last = null, raf = null;
-    const rnd = (s) => { const x = Math.sin(s * 12.9898) * 43758.5453; return x - Math.floor(x); };
-    const sig = (s) => {
-      const breath = Math.sin(s * 2 * Math.PI * 0.75) * 0.45;
-      const cardiac = Math.sin(s * 2 * Math.PI * 2.3) * 0.12;          // heartbeat bleeding in
-      const noise = (rnd(Math.floor(s * 40)) - 0.5) * 0.35;
-      const motion = Math.max(0, Math.sin(s * 0.9)) ** 18 * 1.4 * Math.sin(s * 9); // motion artifact bursts
-      const drift = Math.sin(s * 0.23) * 0.25;
-      return breath + cardiac + noise + motion + drift;
-    };
-    function frame(now, once = false) {
-      const { w, h } = draw.size;
-      if (!once) {
-        if (last !== null) t += Math.min(0.1, (now - last) / 1000);
-        last = now;
-      }
-      ctx.clearRect(0, 0, w, h);
-      drawGrid(ctx, w, h, 28);
-      ctx.strokeStyle = "rgba(255,181,71,0.85)";
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      const W = 10;
-      for (let px = 0; px <= w; px += 2) {
-        const s = t - W + (px / w) * W;
-        const py = h / 2 - sig(s) * (h / 4.2);
-        px === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.stroke();
-      if (!reduced && !once) raf = requestAnimationFrame(frame);
-    }
-    draw.redraw = () => { if (!raf) frame(0, true); };
-    draw.redraw();
-    if (!reduced) whenVisible(noisy, () => { if (!raf) { last = null; raf = requestAnimationFrame(frame); } },
-                            () => { cancelAnimationFrame(raf); raf = null; });
-  }
-
-  // ---------- progress: the full prototype trace, drawn once when visible
-  const proof = document.getElementById("proof-signal");
-  if (proof && trace) {
-    const draw = () => {};
-    const ctx = setupCanvas(proof, draw);
-    let progress = reduced ? 1 : 0, raf = null, started = false;
-    function render() {
-      const { w, h } = draw.size;
-      const y = trace.y, n = y.length, total = n / trace.fs;
-      ctx.clearRect(0, 0, w, h);
-      for (const [a, b] of trace.apnea || []) {
-        ctx.fillStyle = "rgba(255,77,94,0.14)";
-        ctx.fillRect((a / total) * w, 0, ((b - a) / total) * w, h);
-        if (progress * total > a + 20) {
-          ctx.fillStyle = C.red;
-          ctx.font = "600 10px JetBrains Mono, monospace";
-          ctx.fillText("APNEA FLAG · " + Math.round(b - a) + " s", (a / total) * w + 8, 16);
-        }
-      }
-      const upto = Math.floor(n * progress);
-      ctx.strokeStyle = C.cyan; ctx.lineWidth = 1.6;
-      ctx.shadowColor = C.cyan; ctx.shadowBlur = 8;
-      ctx.beginPath();
-      for (let i = 0; i < upto; i++) {
-        const px = (i / (n - 1)) * w, py = h / 2 - y[i] * (h / 2.8);
-        i ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-      }
-      ctx.stroke(); ctx.shadowBlur = 0;
-    }
-    function tick() {
-      progress = Math.min(1, progress + 0.006);
-      render();
-      if (progress < 1) raf = requestAnimationFrame(tick);
-    }
-    draw.redraw = render;
-    new IntersectionObserver(([e]) => {
-      if (e.isIntersecting && !started) { started = true; reduced ? render() : (raf = requestAnimationFrame(tick)); }
-    }, { threshold: 0.4 }).observe(proof);
-    render();
-  }
-
-  // ---------- reveals, nav, counter, team photos, copy email
+  // ---------- reveals, nav, counter, team photos
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); }
   }, { threshold: 0.15, rootMargin: "0px 0px -40px 0px" });
@@ -281,14 +199,4 @@
     else img.addEventListener("error", fallback, { once: true });
   });
 
-  const copy = document.getElementById("copy-email");
-  if (copy) copy.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(copy.dataset.email);
-      copy.textContent = "Copied ✓";
-    } catch {
-      copy.textContent = copy.dataset.email;
-    }
-    setTimeout(() => (copy.textContent = "Copy email"), 2200);
-  });
 })();

@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>MedAxis · Contact-free breathing monitoring for premature infants</title>
-  <meta name="description" content="MedAxis is reimagining respiratory monitoring for premature infants in the NICU: contact-free, using depth and thermal imaging.">
+  <title>MedAxis · Every breath, seen. Without a single touch.</title>
+  <meta name="description" content="MedAxis is building contact-free breathing monitoring for premature infants: no wires, no adhesives on fragile skin.">
   <meta name="theme-color" content="#05061a">
   <meta property="og:title" content="MedAxis">
-  <meta property="og:description" content="Every breath, seen. Without a single touch. Contact-free respiratory monitoring for premature infants.">
+  <meta property="og:description" content="Every breath, seen. Without a single touch.">
   <link rel="icon" href="assets/img/logo.png" type="image/png">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,10 +27,8 @@
       </svg>
     </a>
     <nav class="nav-links" aria-label="Sections">
-      <a href="#story">Why</a>
-      <a href="#today">Today</a>
-      <a href="#approach">Approach</a>
-      <a href="#progress">Progress</a>
+      <a href="#why">Why</a>
+      <a href="#solution">Solution</a>
       <a href="#team">Team</a>
     </nav>
     <a class="btn btn-small" href="#contact">Get in touch</a>
@@ -40,77 +38,39 @@
     <!-- HERO -->
     <section class="hero">
       <div class="hero-copy reveal">
-        <p class="eyebrow">Contact-free respiratory monitoring · NICU</p>
+        <p class="eyebrow">Contact-free neonatal monitoring</p>
         <h1>Every breath, seen.<br><span class="grad">Without a single touch.</span></h1>
-        <p class="lede">MedAxis is reimagining how premature infants are monitored for breathing — watching every breath from a distance, with no adhesives on fragile skin.</p>
+        <p class="lede">MedAxis watches premature infants breathe from a distance — no wires, no adhesives on fragile skin.</p>
         <div class="cta-row">
-          <a class="btn" href="#progress">See our progress</a>
-          <a class="btn btn-ghost" href="#contact">Contact us</a>
+          <a class="btn" href="#contact">Get in touch</a>
+          <a class="btn btn-ghost" href="#solution">How it works</a>
         </div>
       </div>
 
       <figure class="monitor reveal" aria-label="Animated breathing signal from the MedAxis prototype">
         <div class="monitor-bar">
-          <span class="mono dim">RESP · DEPTH</span>
+          <span class="mono dim">RESP · CONTACT-FREE</span>
           <span class="status" id="hero-status"><i></i><b id="hero-state">Breathing</b></span>
           <span class="mono readout" id="hero-readout">— /min</span>
         </div>
         <canvas id="hero-signal" height="260"></canvas>
-        <figcaption class="mono dim">Real signal from our Kinect v2 prototype · hand-motion simulation, replayed</figcaption>
+        <figcaption class="mono dim">Signal captured by our prototype</figcaption>
       </figure>
     </section>
 
-    <!-- STORY -->
-    <section class="story" id="story">
-      <p class="eyebrow reveal">Why we started</p>
-      <h2 class="story-line reveal">We spent a day in the NICU and met a baby weighing</h2>
+    <!-- WHY -->
+    <section class="story" id="why">
+      <p class="eyebrow reveal">Why it matters</p>
+      <h2 class="story-line reveal">In the NICU, we met a baby weighing</h2>
       <p class="big-number reveal" aria-label="500 grams"><span id="grams" data-to="500">0</span><small>grams</small></p>
-
-      <div class="story-grid">
-        <div class="story-text reveal">
-          <p>Born at <strong>24 weeks</strong> — almost four months early. On day 12: wires on the chest, a sensor on the foot.</p>
-          <p>The baby had <strong class="alert">apnea of prematurity</strong>, where breathing pauses because the brain hasn't fully matured. Four episodes in, the care team was worried about the risk of brain injury.</p>
-          <p class="quiet">Moments like this are why monitoring has to be reliable — and gentle.</p>
-        </div>
-        <ul class="stats reveal">
-          <li><span class="stat">≈ 1 in 10</span><span>U.S. babies are born preterm<sup>1</sup></span></li>
-          <li><span class="stat">Nearly all</span><span>infants born before 28 weeks experience apnea of prematurity<sup>2</sup></span></li>
-          <li><span class="stat">~1,400</span><span>NICUs across the United States<sup>3</sup></span></li>
-        </ul>
-      </div>
+      <p class="punch reveal">Today, babies this small are monitored with <strong>adhesive electrodes on skin this fragile</strong> — and nurses told us the breathing signal is <strong>noisy and unreliable</strong>.</p>
     </section>
 
-    <!-- TODAY -->
-    <section class="today" id="today">
+    <!-- SOLUTION -->
+    <section class="approach" id="solution">
       <div class="section-head reveal">
-        <p class="eyebrow">How it's done today</p>
-        <h2>The breathing signal is indirect — and noisy.</h2>
-        <p class="lede">Apnea is caught by watching oxygen saturation, heart rate and a respiratory waveform. That waveform usually comes from <em>impedance pneumography</em>: electrodes glued to the chest that infer breathing from electrical changes.</p>
-      </div>
-
-      <div class="compare reveal">
-        <div class="panel">
-          <div class="panel-head"><span class="mono dim">TODAY · CHEST IMPEDANCE</span><span class="tag tag-warn">illustration</span></div>
-          <canvas id="noisy-signal" height="150"></canvas>
-          <ul class="ticks">
-            <li><span class="x">✕</span>Indirect measurement of breathing</li>
-            <li><span class="x">✕</span>Easily disturbed by motion</li>
-            <li><span class="x">✕</span>Adhesives can damage fragile newborn skin</li>
-          </ul>
-        </div>
-        <blockquote class="quote">
-          <p>“These signals are noisy and inconsistent.”</p>
-          <footer>What we heard from NICU nurses — echoed by the <strong>4 physicians</strong> (including two NICU medical directors) and <strong>2 nurses</strong> we interviewed.</footer>
-        </blockquote>
-      </div>
-    </section>
-
-    <!-- APPROACH -->
-    <section class="approach" id="approach">
-      <div class="section-head reveal">
-        <p class="eyebrow">The MedAxis approach</p>
-        <h2>Reimagined — from a distance.</h2>
-        <p class="lede">Instead of reading breathing through the skin, MedAxis watches it. Two cameras, no contact, one clearer picture of every breath.</p>
+        <p class="eyebrow">The MedAxis solution</p>
+        <h2>Monitoring, reimagined.</h2>
       </div>
 
       <div class="modes">
@@ -120,63 +80,24 @@
               <ellipse cx="100" cy="66" rx="78" ry="34"/><ellipse cx="100" cy="66" rx="58" ry="24"/>
               <ellipse cx="100" cy="66" rx="38" ry="15"/><ellipse cx="100" cy="66" rx="18" ry="7"/></g></svg>
           </div>
-          <p class="mono dim">01 · DEPTH SENSING</p>
-          <h3>See the chest rise and fall</h3>
-          <p>A depth camera measures tiny movements of the chest and abdomen with every breath.</p>
+          <h3>Nothing touches the baby</h3>
+          <p>No wires or adhesives. Breathing is measured from a distance.</p>
         </article>
         <article class="mode reveal">
           <div class="mode-art thermal-art" aria-hidden="true">
             <svg viewBox="0 0 200 120"><defs><radialGradient id="heat"><stop offset="0" stop-color="#ffd36b"/><stop offset=".45" stop-color="#ff5a6b"/><stop offset="1" stop-color="#ff5a6b" stop-opacity="0"/></radialGradient></defs>
               <circle class="heat" cx="100" cy="60" r="44" fill="url(#heat)"/></svg>
           </div>
-          <p class="mono dim">02 · THERMAL IMAGING</p>
-          <h3>Sense the warmth of each breath</h3>
-          <p>A thermal camera detects the airflow of breathing at the nose.</p>
+          <h3>Sees every breath</h3>
+          <p>Depth and thermal imaging capture the rise of the chest and the warmth of each breath.</p>
         </article>
         <article class="mode mode-result reveal">
           <div class="mode-art result-art" aria-hidden="true">
             <svg viewBox="0 0 200 120"><path class="clean-wave" d="M0 60 C 15 30, 25 30, 40 60 S 65 90, 80 60 S 105 30, 120 60 S 145 90, 160 60 S 185 30, 200 60"/></svg>
           </div>
-          <p class="mono dim">→ TOGETHER</p>
-          <h3>One contact-free breathing signal</h3>
-          <p>Combined, they aim to give clinicians a clearer view of breathing — and, soon, automated apnea alerts, respiratory rate and breathing patterns.</p>
+          <h3>Smarter alerts</h3>
+          <p>AI-assisted breathing analysis, built to catch apnea early and help nurses focus.</p>
         </article>
-      </div>
-    </section>
-
-    <!-- PROGRESS -->
-    <section class="progress" id="progress">
-      <div class="section-head reveal">
-        <p class="eyebrow">Progress</p>
-        <h2>Where we are today.</h2>
-        <p class="lede">We're early, and we say so: our proof of concept tracks surface movement over time. It has not yet been validated on infants.</p>
-      </div>
-
-      <div class="progress-grid">
-        <ol class="timeline reveal">
-          <li class="done"><span class="chip">Done</span>
-            <h3>Learned from the NICU</h3>
-            <p>Shadowed for a full day at UNC Children's Hospital and interviewed NICU physicians and nurses about how breathing is monitored today.</p></li>
-          <li class="done"><span class="chip">Done</span>
-            <h3>Tested depth sensors</h3>
-            <p>Evaluated time-of-flight sensors and a Microsoft Kinect v2 depth camera.</p></li>
-          <li class="done"><span class="chip">Proof of concept</span>
-            <h3>Built our own software</h3>
-            <p>Records depth video, lets us pick a region to analyse, and tracks how that surface moves over time — including flagging when movement stops, tested with a hand simulating breathing.</p></li>
-          <li class="next"><span class="chip">Next</span>
-            <h3>A real prototype</h3>
-            <p>A higher-resolution depth camera with an embedded computer, thermal imaging alongside depth, and AI-assisted breathing analysis.</p></li>
-        </ol>
-
-        <figure class="proof reveal">
-          <div class="proof-img">
-            <img src="assets/img/depth_hand.png" alt="Depth image from the MedAxis prototype: a hand in warm colors with a teal analysis box" width="1024" height="848" loading="lazy">
-            <span class="hud hud-tl mono">DEPTH · 30 FPS</span>
-            <span class="hud hud-br mono">NEAR ← → FAR</span>
-          </div>
-          <canvas id="proof-signal" height="120"></canvas>
-          <figcaption class="dim">From our prototype: the teal box follows a hand moving like a breathing abdomen. The line below is that box's movement over time; the red band is where it held still for over 20 s.</figcaption>
-        </figure>
       </div>
     </section>
 
@@ -184,18 +105,17 @@
     <section class="team" id="team">
       <div class="section-head reveal">
         <p class="eyebrow">Team</p>
-        <h2>Engineers who've been to the bedside.</h2>
-        <p class="lede">Biomedical engineering students bringing together clinical insight, embedded systems and data science.</p>
+        <h2>The people behind MedAxis.</h2>
       </div>
       <div class="people">
         <article class="person reveal" data-initials="BB"><img src="assets/team/bobby.jpg" alt="Bobby Bhandari" loading="lazy">
-          <h3>Bobby Bhandari</h3><p class="role">Embedded systems engineering</p><a href="mailto:bbhanda@ncsu.edu">bbhanda@ncsu.edu</a></article>
+          <h3>Bobby Bhandari</h3><p class="role">Embedded systems engineering</p></article>
         <article class="person reveal" data-initials="AM"><img src="assets/team/allen.jpg" alt="Allen Ma" loading="lazy">
-          <h3>Allen Ma</h3><p class="role">Pre-Med · Clinical connections</p><a href="mailto:asma@ncsu.edu">asma@ncsu.edu</a></article>
+          <h3>Allen Ma</h3><p class="role">Pre-Med · Clinical connections</p></article>
         <article class="person reveal" data-initials="AS"><img src="assets/team/alan.jpg" alt="Alan Saj" loading="lazy">
-          <h3>Alan Saj</h3><p class="role">Data science</p><a href="mailto:assaj2@ncsu.edu">assaj2@ncsu.edu</a></article>
+          <h3>Alan Saj</h3><p class="role">Data science</p></article>
         <article class="person reveal" data-initials="JA"><img src="assets/team/jessica.jpg" alt="Jessica Ardeshana" loading="lazy">
-          <h3>Jessica Ardeshana</h3><p class="role">Data science</p><a href="mailto:jgardesh@ncsu.edu">jgardesh@ncsu.edu</a></article>
+          <h3>Jessica Ardeshana</h3><p class="role">Data science</p></article>
       </div>
     </section>
 
@@ -203,9 +123,8 @@
     <section class="contact" id="contact">
       <div class="contact-card reveal">
         <img class="contact-logo" src="assets/img/logo.png" alt="MedAxis logo" width="104" height="104" loading="lazy">
-        <p class="eyebrow">Contact</p>
         <h2>Let's talk.</h2>
-        <p class="lede">We'd love to hear from clinicians, engineers, mentors and anyone who wants to help us build gentler monitoring for the smallest patients.</p>
+        <p class="lede">Interested in what we're building? We'd love to hear from you.</p>
         <ul class="contact-list">
           <li><a href="mailto:bbhanda@ncsu.edu?subject=Hello%20MedAxis"><span>Bobby Bhandari</span><b>bbhanda@ncsu.edu</b></a></li>
           <li><a href="mailto:asma@ncsu.edu?subject=Hello%20MedAxis"><span>Allen Ma</span><b>asma@ncsu.edu</b></a></li>
@@ -219,13 +138,8 @@
   <footer class="footer">
     <div class="footer-row">
       <span class="footer-brand"><img src="assets/img/logo.png" alt="" width="28" height="28" loading="lazy"><span class="mono">MEDΛXIS</span></span>
-      <span class="dim">Student biomedical engineering venture · North Carolina</span>
-      <span class="dim">© 2026 MedAxis</span>
+      <span class="dim">© 2026 MedAxis · In development, not yet a medical device.</span>
     </div>
-    <p class="fine dim">MedAxis is an early-stage research prototype, not a medical device, and has not been evaluated on patients.
-      <sup>1</sup> CDC, National Center for Health Statistics, U.S. births data.
-      <sup>2</sup> Eichenwald EC, AAP Committee on Fetus and Newborn, “Apnea of Prematurity,” <em>Pediatrics</em> 2016;137(1):e20153757.
-      <sup>3</sup> Pineda R, et al., “NICUs in the US: levels of acuity, number of beds, and relationships to population factors,” <em>Journal of Perinatology</em> 2023 (1,424 NICUs identified, 2021 data). <a href="https://doi.org/10.1038/s41372-023-01693-6">doi:10.1038/s41372-023-01693-6</a></p>
   </footer>
 
   <script src="assets/data/trace.js"></script>

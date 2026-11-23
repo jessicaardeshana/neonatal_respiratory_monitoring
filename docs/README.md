@@ -6,7 +6,6 @@ Static one-page site (HTML + CSS + a little JavaScript, no build step).
 - `styles.css`: design
 - `main.js`: signal animations and scroll reveals
 - `assets/data/trace.js`: real breathing trace from the Kinect v2 prototype (hand-motion simulation, recording 2026-11-17)
-- `assets/img/depth_hand.png`: depth frame from the same recording, with the analysis box
 - `assets/team/`: team photos
 
 ## Preview locally
